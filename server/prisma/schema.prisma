@@ -49,14 +49,14 @@ model Despesa {
     id              Int                  @id @default(autoincrement())
     valor           Float
     dataTransacao   DateTime
-    tipoTransacaoId Int
+    tipoTransacaoId Int                  @default(1)
     categoriaId     Int
     subCategoriaId  Int?
     observacao      String?
     tags            Tag[]                @relation
     categoria       Categoria            @relation(fields: [categoriaId], references: [id])
     subCategoria    SubCategoria?        @relation(fields: [subCategoriaId], references: [id])
-    contaId         Int
+    contaId         Int                  @default(1)
     conta           Conta                @relation(fields: [contaId], references: [id])
     tipoTransacao   TipoTransacaoDespesa @relation(fields: [tipoTransacaoId], references: [id])
 }

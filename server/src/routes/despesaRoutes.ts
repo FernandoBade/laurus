@@ -1,5 +1,3 @@
-// src/routes/despesaRoutes.ts
-
 import express from 'express';
 import DespesaController from '../controllers/DespesaController';
 

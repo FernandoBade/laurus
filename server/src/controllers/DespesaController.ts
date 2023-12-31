@@ -1,39 +1,49 @@
-// src/controllers/DespesaController.ts
-
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import Joi from 'joi';
 
-// Definição do esquema de validação
-const despesaSchema = Joi.object({
+const prisma = new PrismaClient();
+
+
+const despesaCreateSchema = Joi.object({
     valor: Joi.number().required(),
     dataTransacao: Joi.date().iso().required(),
-    tipoTransacao: Joi.string().valid('Débito', 'Crédito', 'Dinheiro').required(),
+    tipoTransacaoId: Joi.number().integer().required(),
     categoriaId: Joi.number().integer().required(),
     subCategoriaId: Joi.number().integer().optional(),
-    observacao: Joi.string().optional()
+    observacao: Joi.string().optional(),
+    contaId: Joi.number().integer().required()
 });
 
-const prisma = new PrismaClient();
+const despesaUpdateSchema = Joi.object({
+    valor: Joi.number().optional(),
+    dataTransacao: Joi.date().iso().optional(),
+    tipoTransacaoId: Joi.number().integer().optional(),
+    categoriaId: Joi.number().integer().optional(),
+    subCategoriaId: Joi.number().integer().optional(),
+    observacao: Joi.string().optional(),
+    contaId: Joi.number().integer().optional()
+}).min(1);
+
 
 class DespesaController {
     static async criarDespesa(req: Request, res: Response) {
+        const { error, value } = despesaCreateSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+
         try {
-            // Validando os dados de entrada
-            const { error, value } = despesaSchema.validate(req.body);
-
-            if (error) {
-                return res.status(400).json({ error: error.details[0].message });
-            }
-
             const novaDespesa = await prisma.despesa.create({ data: value });
             console.log('Despesa criada:', novaDespesa);
             res.status(201).json(novaDespesa);
-        } catch (error) {
-            console.error('Erro ao criar despesa:', error);
-            res.status(400).json({ error: 'Erro ao criar despesa' });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.error('Erro ao criar despesa:', error.message, error);
+            res.status(400).json({ error: 'Erro ao criar despesa', errorMessage: error.message });
         }
     }
+
 
     static async listarTodasDespesas(req: Request, res: Response) {
         try {
@@ -66,12 +76,15 @@ class DespesaController {
 
     static async atualizarDespesa(req: Request, res: Response) {
         const { id } = req.params;
-        const dadosAtualizados = req.body;
+        const { error, value } = despesaUpdateSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
 
         try {
             const despesaAtualizada = await prisma.despesa.update({
                 where: { id: Number(id) },
-                data: dadosAtualizados,
+                data: value,
             });
             console.log('Despesa atualizada:', despesaAtualizada);
             res.json(despesaAtualizada);
