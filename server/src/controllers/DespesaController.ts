@@ -4,7 +4,6 @@ import Joi from 'joi';
 
 const prisma = new PrismaClient();
 
-
 const despesaCreateSchema = Joi.object({
     valor: Joi.number().required(),
     dataTransacao: Joi.date().iso().required(),
