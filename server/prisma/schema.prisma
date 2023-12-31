@@ -1,0 +1,140 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model TipoTransacaoDespesa {
+    id       Int       @id @default(autoincrement())
+    nome     String
+    despesas Despesa[]
+}
+
+model TipoTransacaoDespesaCartao {
+    id             Int             @id @default(autoincrement())
+    nome           String
+    despesasCartao DespesaCartao[]
+}
+
+model TipoTransacaoReceita {
+    id       Int       @id @default(autoincrement())
+    nome     String
+    receitas Receita[]
+}
+
+model TipoTransacaoReceitaCartao {
+    id             Int             @id @default(autoincrement())
+    nome           String
+    receitasCartao ReceitaCartao[]
+}
+
+model Conta {
+    id       Int       @id @default(autoincrement())
+    nome     String
+    despesas Despesa[]
+    receitas Receita[]
+}
+
+model CartaoCredito {
+    id       Int             @id @default(autoincrement())
+    nome     String
+    despesas DespesaCartao[]
+    receitas ReceitaCartao[]
+}
+
+model Despesa {
+    id              Int                  @id @default(autoincrement())
+    valor           Float
+    dataTransacao   DateTime
+    tipoTransacaoId Int
+    categoriaId     Int
+    subCategoriaId  Int?
+    observacao      String?
+    tags            Tag[]                @relation
+    categoria       Categoria            @relation(fields: [categoriaId], references: [id])
+    subCategoria    SubCategoria?        @relation(fields: [subCategoriaId], references: [id])
+    contaId         Int
+    conta           Conta                @relation(fields: [contaId], references: [id])
+    tipoTransacao   TipoTransacaoDespesa @relation(fields: [tipoTransacaoId], references: [id])
+}
+
+model DespesaCartao {
+    id              Int                        @id @default(autoincrement())
+    valor           Float
+    dataTransacao   DateTime
+    tipoTransacaoId Int
+    categoriaId     Int
+    subCategoriaId  Int?
+    observacao      String?
+    tags            Tag[]                      @relation
+    categoria       Categoria                  @relation(fields: [categoriaId], references: [id])
+    subCategoria    SubCategoria?              @relation(fields: [subCategoriaId], references: [id])
+    cartaoCreditoId Int
+    cartaoCredito   CartaoCredito              @relation(fields: [cartaoCreditoId], references: [id])
+    tipoTransacao   TipoTransacaoDespesaCartao @relation(fields: [tipoTransacaoId], references: [id])
+}
+
+model Receita {
+    id              Int                  @id @default(autoincrement())
+    valor           Float
+    dataTransacao   DateTime
+    tipoTransacaoId Int
+    categoriaId     Int
+    subCategoriaId  Int?
+    observacao      String?
+    tags            Tag[]                @relation
+    categoria       Categoria            @relation(fields: [categoriaId], references: [id])
+    subCategoria    SubCategoria?        @relation(fields: [subCategoriaId], references: [id])
+    contaId         Int
+    conta           Conta                @relation(fields: [contaId], references: [id])
+    tipoTransacao   TipoTransacaoReceita @relation(fields: [tipoTransacaoId], references: [id])
+}
+
+model ReceitaCartao {
+    id              Int                        @id @default(autoincrement())
+    valor           Float
+    dataTransacao   DateTime
+    tipoTransacaoId Int
+    categoriaId     Int
+    subCategoriaId  Int?
+    observacao      String?
+    tags            Tag[]                      @relation
+    categoria       Categoria                  @relation(fields: [categoriaId], references: [id])
+    subCategoria    SubCategoria?              @relation(fields: [subCategoriaId], references: [id])
+    cartaoCreditoId Int
+    cartaoCredito   CartaoCredito              @relation(fields: [cartaoCreditoId], references: [id])
+    tipoTransacao   TipoTransacaoReceitaCartao @relation(fields: [tipoTransacaoId], references: [id])
+}
+
+model Categoria {
+    id            Int             @id @default(autoincrement())
+    nome          String
+    despesas      Despesa[]
+    receitas      Receita[]
+    subCategorias SubCategoria[]
+    DespesaCartao DespesaCartao[]
+    ReceitaCartao ReceitaCartao[]
+}
+
+model SubCategoria {
+    id            Int             @id @default(autoincrement())
+    nome          String
+    categoriaId   Int
+    categoria     Categoria       @relation(fields: [categoriaId], references: [id])
+    despesas      Despesa[]
+    receitas      Receita[]
+    DespesaCartao DespesaCartao[]
+    ReceitaCartao ReceitaCartao[]
+}
+
+model Tag {
+    id            Int             @id @default(autoincrement())
+    nome          String
+    despesas      Despesa[]
+    receitas      Receita[]
+    DespesaCartao DespesaCartao[]
+    ReceitaCartao ReceitaCartao[]
+}
