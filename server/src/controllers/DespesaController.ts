@@ -1,56 +1,38 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import Joi from 'joi';
+import Despesa from '../models/despesa';
 
-const prisma = new PrismaClient();
-
-const despesaCreateSchema = Joi.object({
-    valor: Joi.number().required(),
-    dataTransacao: Joi.date().iso().required(),
-    tipoTransacaoId: Joi.number().integer().required(),
-    categoriaId: Joi.number().integer().required(),
-    subCategoriaId: Joi.number().integer().optional(),
-    observacao: Joi.string().optional(),
-    contaId: Joi.number().integer().required()
-});
-
-const despesaUpdateSchema = Joi.object({
+const despesaSchema = Joi.object({
     valor: Joi.number().optional(),
     dataTransacao: Joi.date().iso().optional(),
-    tipoTransacaoId: Joi.number().integer().optional(),
-    categoriaId: Joi.number().integer().optional(),
-    subCategoriaId: Joi.number().integer().optional(),
+    tipoTransacao: Joi.string().optional(),
+    categoria: Joi.string().optional(),
+    conta: Joi.string().optional(),
     observacao: Joi.string().optional(),
-    contaId: Joi.number().integer().optional()
+    tags: Joi.array().items(Joi.string()).optional()
 }).min(1);
-
 
 class DespesaController {
     static async criarDespesa(req: Request, res: Response) {
-        const { error, value } = despesaCreateSchema.validate(req.body);
+        const { error, value } = despesaSchema.validate(req.body, { presence: 'required' });
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
 
         try {
-            const novaDespesa = await prisma.despesa.create({ data: value });
-            console.log('Despesa criada:', novaDespesa);
+            const novaDespesa = new Despesa(value);
+            await novaDespesa.save();
             res.status(201).json(novaDespesa);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            console.error('Erro ao criar despesa:', error.message, error);
-            res.status(400).json({ error: 'Erro ao criar despesa', errorMessage: error.message });
+        } catch (error: unknown) {
+            res.status(400).json({ error: 'Erro ao criar despesa', errorMessage: error });
         }
     }
 
-
     static async listarTodasDespesas(req: Request, res: Response) {
         try {
-            const despesas = await prisma.despesa.findMany();
-            console.log(`${despesas.length} despesas encontradas`);
+            const despesas = await Despesa.find();
             res.json(despesas);
         } catch (error) {
-            console.error('Erro ao listar despesas:', error);
             res.status(400).json({ error: 'Erro ao listar despesas' });
         }
     }
@@ -59,36 +41,33 @@ class DespesaController {
         const { id } = req.params;
 
         try {
-            const despesa = await prisma.despesa.findUnique({ where: { id: Number(id) } });
+            const despesa = await Despesa.findById(id);
             if (despesa) {
-                console.log('Despesa encontrada:', despesa);
                 res.json(despesa);
             } else {
-                console.log('Despesa não encontrada para o ID:', id);
                 res.status(404).json({ error: 'Despesa não encontrada' });
             }
         } catch (error) {
-            console.error('Erro ao obter despesa:', error);
             res.status(400).json({ error: 'Erro ao obter despesa' });
         }
     }
 
     static async atualizarDespesa(req: Request, res: Response) {
         const { id } = req.params;
-        const { error, value } = despesaUpdateSchema.validate(req.body);
+        const { error, value } = despesaSchema.validate(req.body);
+
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
 
         try {
-            const despesaAtualizada = await prisma.despesa.update({
-                where: { id: Number(id) },
-                data: value,
-            });
-            console.log('Despesa atualizada:', despesaAtualizada);
-            res.json(despesaAtualizada);
+            const despesaAtualizada = await Despesa.findByIdAndUpdate(id, value, { new: true });
+            if (despesaAtualizada) {
+                res.json(despesaAtualizada);
+            } else {
+                res.status(404).json({ error: 'Despesa não encontrada' });
+            }
         } catch (error) {
-            console.error('Erro ao atualizar despesa:', error);
             res.status(400).json({ error: 'Erro ao atualizar despesa' });
         }
     }
@@ -97,11 +76,13 @@ class DespesaController {
         const { id } = req.params;
 
         try {
-            await prisma.despesa.delete({ where: { id: Number(id) } });
-            console.log('Despesa excluída com o ID:', id);
-            res.status(200).json({ message: 'Despesa excluída com sucesso' });
+            const despesaExcluida = await Despesa.findByIdAndDelete(id);
+            if (despesaExcluida) {
+                res.status(200).json({ message: 'Despesa excluída com sucesso' });
+            } else {
+                res.status(404).json({ error: 'Despesa não encontrada' });
+            }
         } catch (error) {
-            console.error('Erro ao excluir despesa:', error);
             res.status(400).json({ error: 'Erro ao excluir despesa' });
         }
     }
