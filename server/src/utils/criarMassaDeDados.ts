@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { DespesaConta, Categoria, Conta, TipoTransacao, Tag, Usuario } from '../models/despesa';
 
-const uri = `mongodb+srv://crebito:WII8VNEuBYRrxRhv@crebito.anxiuwm.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `env.URI`;
 mongoose.connect(uri);
 
 async function criarMassaDeDados() {
