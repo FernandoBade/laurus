@@ -1,8 +1,18 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // src/app.ts
 
 import express from 'express';
 import despesaRoutes from './routes/despesaRoutes';
-// importe outras rotas aqui
+import mongoose from 'mongoose';
+require('dotenv').config();
+
+const uri = process.env.URI;
+if (!uri) {
+    throw new Error('A variável de ambiente URI não está definida.');
+}
+
+mongoose.connect(uri);
+
 
 const app = express();
 

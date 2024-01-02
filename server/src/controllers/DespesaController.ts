@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import Despesa from '../models/despesa';
+import { DespesaConta } from '../models/despesa';
 
 const despesaSchema = Joi.object({
     valor: Joi.number().optional(),
@@ -20,7 +20,7 @@ class DespesaController {
         }
 
         try {
-            const novaDespesa = new Despesa(value);
+            const novaDespesa = new DespesaConta(value);
             await novaDespesa.save();
             res.status(201).json(novaDespesa);
         } catch (error: unknown) {
@@ -30,7 +30,7 @@ class DespesaController {
 
     static async listarTodasDespesas(req: Request, res: Response) {
         try {
-            const despesas = await Despesa.find();
+            const despesas = await DespesaConta.find();
             res.json(despesas);
         } catch (error) {
             res.status(400).json({ error: 'Erro ao listar despesas' });
@@ -41,14 +41,22 @@ class DespesaController {
         const { id } = req.params;
 
         try {
-            const despesa = await Despesa.findById(id);
+            const despesa = await DespesaConta.findById(id);
             if (despesa) {
                 res.json(despesa);
             } else {
+                console.log(`Despesa com ID ${id} não encontrada.`);
                 res.status(404).json({ error: 'Despesa não encontrada' });
             }
         } catch (error) {
-            res.status(400).json({ error: 'Erro ao obter despesa' });
+            if (error instanceof Error) {
+                console.error(`Erro ao obter despesa com ID ${id}:`, error.message);
+                console.error(error.stack); // O stack trace ainda será acessível aqui
+                res.status(400).json({ error: 'Erro ao obter despesa', errorMessage: error.message });
+            } else {
+                // Se o erro não for uma instância de Error, lidar de forma genérica
+                res.status(500).json({ error: 'Erro interno do servidor' });
+            }
         }
     }
 
@@ -61,7 +69,7 @@ class DespesaController {
         }
 
         try {
-            const despesaAtualizada = await Despesa.findByIdAndUpdate(id, value, { new: true });
+            const despesaAtualizada = await DespesaConta.findByIdAndUpdate(id, value, { new: true });
             if (despesaAtualizada) {
                 res.json(despesaAtualizada);
             } else {
@@ -76,7 +84,7 @@ class DespesaController {
         const { id } = req.params;
 
         try {
-            const despesaExcluida = await Despesa.findByIdAndDelete(id);
+            const despesaExcluida = await DespesaConta.findByIdAndDelete(id);
             if (despesaExcluida) {
                 res.status(200).json({ message: 'Despesa excluída com sucesso' });
             } else {

@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const uri = process.env.URI;
 if (!uri) {
-    throw new Error('A variável de ambiente MONGODB_URI não está definida.');
+    throw new Error('A variável de ambiente URI não está definida.');
 }
 
 const client = new MongoClient(uri, {
