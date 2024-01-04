@@ -1,7 +1,20 @@
 import mongoose from 'mongoose';
-import { DespesaConta, Categoria, Conta, TipoTransacao, Tag, Usuario } from '../models/despesa';
+import dotenv from 'dotenv';
+import Usuario from '../models/usuario';
+import Conta from '../models/conta';
+import CartaoCredito from '../models/cartaoDeCredito';
+import Categoria from '../models/categoria';
+import Subcategoria from '../models/subcategoria';
+import Tag from '../models/tag';
+import TipoTransacao from '../models/tipoTransacao_despesa';
+import DespesaConta from '../models/despesaConta';
+import DespesaCartao from '../models/despesaCartao';
 
-const uri = `mongodb+srv://crebito:WII8VNEuBYRrxRhv@crebito.anxiuwm.mongodb.net/?retryWrites=true&w=majority`;
+dotenv.config();
+const uri = process.env.URI;
+if (!uri) {
+    throw new Error('A URI do banco de dados não está definida no arquivo .env');
+  }
 mongoose.connect(uri);
 
 async function criarMassaDeDados() {
