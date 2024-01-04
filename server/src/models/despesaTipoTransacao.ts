@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const tipoTransacaoSchema = new mongoose.Schema({
+const despesaTipoTransacaoSchema = new mongoose.Schema({
     nome: {
         type: String, enum: [
             'Boleto',
@@ -18,6 +18,6 @@ const tipoTransacaoSchema = new mongoose.Schema({
     }
 });
 
-const TipoTransacao = mongoose.model('TipoTransacao', tipoTransacaoSchema, 'tipos_de_transacoes');
+const TipoTransacao = mongoose.model('DespesaTipoTransacao', despesaTipoTransacaoSchema, 'despesa_tipoTransacao');
 
 export default TipoTransacao;

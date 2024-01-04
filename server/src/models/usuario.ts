@@ -9,8 +9,10 @@ const usuarioSchema = new mongoose.Schema({
     dataNascimento: { type: Date, required: true },
     contas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Conta' }],
     cartoesDeCredito: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartaoCredito' }],
-    categorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Categoria' }],
-    subcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subcategoria' }],
+    despesaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCategoria' }],
+    despesaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria' }],
+    receitaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCategoria' }],
+    receitaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria' }],
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }]
 });
 
