@@ -5,6 +5,6 @@ const receitaSubcategoriaSchema = new mongoose.Schema({
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 
-const Subcategoria = mongoose.model('ReceitaSubcategoria', receitaSubcategoriaSchema, 'receita_subcategoria');
+const ReceitaSubcategoria = mongoose.model('ReceitaSubcategoria', receitaSubcategoriaSchema, 'receita_subcategoria');
 
-export default Subcategoria;
+export default ReceitaSubcategoria;

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const contaSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
     banco: { type: String, required: true },
     tipoConta: { type: String, enum: ['Conta Corrente', 'Poupança', 'Investimento'], required: true },
     observacao: { type: String },

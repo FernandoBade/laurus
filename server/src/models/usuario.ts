@@ -26,6 +26,6 @@ usuarioSchema.methods.verificarSenha = function (senhaCandidata: string) {
     return bcrypt.compare(senhaCandidata, this.senha);
 };
 
-const Usuario = mongoose.model('Usuario', usuarioSchema);
+const Usuario = mongoose.model('Usuario', usuarioSchema, 'usuario');
 
 export default Usuario;

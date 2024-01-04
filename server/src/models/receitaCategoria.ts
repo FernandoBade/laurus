@@ -6,6 +6,6 @@ const receitaCategoriaSchema = new mongoose.Schema({
     receitaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria' }]
 });
 
-const Categoria = mongoose.model('ReceitaCategoria', receitaCategoriaSchema, 'receita_Categoria');
+const ReceitaCategoria = mongoose.model('ReceitaCategoria', receitaCategoriaSchema, 'receita_categoria');
 
-export default Categoria;
+export default ReceitaCategoria;

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const despesaCartaoCreditoSchema = new mongoose.Schema({
+const receitaCartaoCreditoSchema = new mongoose.Schema({
     cartaoCredito: { type: mongoose.Schema.Types.ObjectId, ref: 'CartaoCredito', required: true },
     valor: { type: Number, required: true },
     dataTransacao: { type: Date, required: true },
@@ -11,6 +11,6 @@ const despesaCartaoCreditoSchema = new mongoose.Schema({
     observacao: { type: String, required: false },
 });
 
-const DespesaCartao = mongoose.model('DespesaCartaoCredito', despesaCartaoCreditoSchema, 'despesa_cartaoCredito');
+const ReceitaCartao = mongoose.model('ReceitaCartaoCredito', receitaCartaoCreditoSchema, 'receita_cartaoCredito');
 
-export default DespesaCartao;
+export default ReceitaCartao;

@@ -14,6 +14,6 @@ const receitaTipoTransacaoSchema = new mongoose.Schema({
     }
 });
 
-const TipoTransacao = mongoose.model('ReceitaTipoTransacao', receitaTipoTransacaoSchema, 'receita_tipoTransacao');
+const ReceitaTipoTransacao = mongoose.model('ReceitaTipoTransacao', receitaTipoTransacaoSchema, 'receita_tipoTransacao');
 
-export default TipoTransacao;
+export default ReceitaTipoTransacao;
