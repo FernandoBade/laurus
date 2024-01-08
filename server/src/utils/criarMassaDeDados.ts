@@ -30,17 +30,17 @@ async function criarMassaDeDados() {
 
     const tiposTransacaoNomes = ['Boleto', 'Compra no Débito', 'Outro', 'PIX', 'Saque', 'Transferência'];
     const categoriasNomes = ['Alimentação', 'Assinatura', 'Casa', 'Contas de Consumo', 'Documentação', 'Eletrônico', 'Entretenimento', 'Imposto', 'Investimento', 'Papelaria', 'Pet', 'Presente', 'Saúde', 'Tabacaria', 'Transporte', 'Vestuário'];
-    const contasNomes = ['PF', 'PJ'];
+    const contasNomes = ['PF', 'PJ', 'Investimento'];
     const contasBancos = ['Nubank', 'Bradesco', 'C6 Bank'];
     const tagsNomes = ['viagem', 'trabalho'];
     const usuarioId = '65962ede933c35e1079900c3'
 
     const categorias = await Promise.all(categoriasNomes.map(nome => new DespesaCategoria({ nome, usuario: usuarioId }).save()));
-    const contas = await Promise.all(contasNomes.flatMap(nome => contasBancos.map(banco => new Conta({ nome: `Conta ${nome} - ${banco}`, banco: banco, tipoConta: 'Conta Corrente', usuario: usuarioId }).save())));
+    const contas = await Promise.all(contasNomes.flatMap(nome => contasBancos.map(banco => new Conta({ nome: `Conta ${nome}`, banco: banco, tipoConta: 'Conta Corrente', usuario: usuarioId }).save())));
     const tiposTransacao = await Promise.all(tiposTransacaoNomes.map(nome => new DespesaTipoTransacao({ nome }).save()));
     const tags = await Promise.all(tagsNomes.map(nome => new Tag({ nome, usuario: usuarioId }).save()));
 
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 10; i++) {
         const diasAleatorios = Math.floor(Math.random() * 180);
         const dataAleatoria = new Date();
         dataAleatoria.setDate(dataAleatoria.getDate() - diasAleatorios);
@@ -61,10 +61,19 @@ async function criarMassaDeDados() {
             usuario: usuarioId
         });
 
+        console.log(`Criando Despesa: ${i + 1}`);
+        console.log(`Categoria ID: ${categoriaAleatoria._id}`);
+        console.log(`Conta ID: ${contaAleatoria._id}`);
+        console.log(`Tipo Transação ID: ${tipoTransacaoAleatorio._id}`);
+        console.log(`Tag ID: ${tagAleatoria._id}`);
+        console.log(`Valor: ${novaDespesa.valor}`);
+        console.log(`Data Transação: ${novaDespesa.dataTransacao}`);
+        console.log(`Observação: ${novaDespesa.observacao}`);
+
         await novaDespesa.save();
     }
 
-    console.log('300 transações criadas com sucesso.');
+    console.log('10 transações criadas com sucesso.');
 }
 
 criarMassaDeDados()

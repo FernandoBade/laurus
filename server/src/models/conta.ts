@@ -8,6 +8,6 @@ const contaSchema = new mongoose.Schema({
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 
-const Conta = mongoose.model('Conta', contaSchema, 'conta');
+const Conta = mongoose.model('Conta', contaSchema, 'Conta');
 
 export default Conta;

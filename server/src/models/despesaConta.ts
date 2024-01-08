@@ -11,6 +11,6 @@ const despesaContaSchema = new mongoose.Schema({
     observacao: { type: String }
 });
 
-const DespesaConta = mongoose.model('DespesaConta', despesaContaSchema, 'despesa_conta');
+const DespesaConta = mongoose.model('DespesaConta', despesaContaSchema, 'DespesaConta');
 
 export default DespesaConta;

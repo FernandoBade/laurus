@@ -11,6 +11,6 @@ const receitaContaSchema = new mongoose.Schema({
     observacao: { type: String }
 });
 
-const ReceitaConta = mongoose.model('ReceitaConta', receitaContaSchema, 'receita_conta');
+const ReceitaConta = mongoose.model('ReceitaConta', receitaContaSchema, 'ReceitaConta');
 
 export default ReceitaConta;

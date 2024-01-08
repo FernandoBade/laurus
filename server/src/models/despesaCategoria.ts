@@ -6,6 +6,6 @@ const despesaCategoriaSchema = new mongoose.Schema({
     despesaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria' }]
 });
 
-const DespesaCategoria = mongoose.model('DespesaCategoria', despesaCategoriaSchema, 'despesa_categoria');
+const DespesaCategoria = mongoose.model('DespesaCategoria', despesaCategoriaSchema, 'DespesaCategoria');
 
 export default DespesaCategoria;

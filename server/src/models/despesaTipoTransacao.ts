@@ -18,6 +18,6 @@ const despesaTipoTransacaoSchema = new mongoose.Schema({
     }
 });
 
-const DespesaTipoTransacao = mongoose.model('DespesaTipoTransacao', despesaTipoTransacaoSchema, 'despesa_tipoTransacao');
+const DespesaTipoTransacao = mongoose.model('DespesaTipoTransacao', despesaTipoTransacaoSchema, 'DespesaTipoTransacao');
 
 export default DespesaTipoTransacao;

@@ -8,6 +8,6 @@ const cartaoCreditoSchema = new mongoose.Schema({
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 
-const CartaoCredito = mongoose.model('CartaoCredito', cartaoCreditoSchema, 'cartaoCredito');
+const CartaoCredito = mongoose.model('CartaoCredito', cartaoCreditoSchema, 'CartaoCredito');
 
 export default CartaoCredito;
