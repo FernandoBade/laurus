@@ -1,10 +1,10 @@
 {
-  "name": "server",
+  "name": "laurus",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/crebito.ts"
+    "start": "ts-node src/laurus.ts"
   },
   "keywords": [],
   "author": "",

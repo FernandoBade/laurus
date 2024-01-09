@@ -2,7 +2,8 @@
 // src/app.ts
 
 import express from 'express';
-import despesaRoutes from './routes/despesaRoutes';
+import despesaContaRoutes from './routes/despesaContaRoutes';
+import despesaCartaoRoutes from './routes/despesaCartaoRoutes'; // Importe o roteador de DespesaCartao
 import mongoose from 'mongoose';
 require('dotenv').config();
 
@@ -13,13 +14,13 @@ if (!uri) {
 
 mongoose.connect(uri);
 
-
 const app = express();
 
 app.use(express.json());
 
 // Rotas
-app.use('/api/despesas', despesaRoutes);
+app.use('/api/despesaConta', despesaContaRoutes);
+app.use('/api/despesaCartao', despesaCartaoRoutes); // Defina o caminho para DespesaCartao
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
