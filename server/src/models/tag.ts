@@ -5,6 +5,6 @@ const tagSchema = new mongoose.Schema({
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 
-const Tag = mongoose.model('Tag', tagSchema, 'tags');
+const Tag = mongoose.model('Tag', tagSchema, 'Tag');
 
 export default Tag;
