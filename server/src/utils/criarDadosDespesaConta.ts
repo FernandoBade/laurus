@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import Usuario from '../models/usuario';
 import Conta from '../models/conta';
 import DespesaCategoria from '../models/despesaCategoria';
 import Tag from '../models/tag';
 import DespesaTipoTransacao from '../models/despesaTipoTransacao';
 import DespesaConta from '../models/despesaConta';
-import Usuario from '../models/usuario';
-import { selecionarTagsAleatorias, gerarNumeroAleatorio } from './commons';
+import { selecionarTagsAleatorias } from './commons';
 
 dotenv.config();
 

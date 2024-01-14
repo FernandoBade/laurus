@@ -92,7 +92,6 @@ async function criarMassaDeDados() {
         }
         console.log('--------------------------------------');
 
-
         await novaDespesaCartao.save();
     }
 

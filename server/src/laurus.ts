@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-// src/app.ts
-
 import express from 'express';
 import despesaContaRoutes from './routes/despesaContaRoutes';
-import despesaCartaoRoutes from './routes/despesaCartaoRoutes'; // Importe o roteador de DespesaCartao
+import despesaCartaoRoutes from './routes/despesaCartaoRoutes';
 import mongoose from 'mongoose';
 require('dotenv').config();
 
@@ -18,9 +15,8 @@ const app = express();
 
 app.use(express.json());
 
-// Rotas
 app.use('/api/despesaConta', despesaContaRoutes);
-app.use('/api/despesaCartao', despesaCartaoRoutes); // Defina o caminho para DespesaCartao
+app.use('/api/despesaCartao', despesaCartaoRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

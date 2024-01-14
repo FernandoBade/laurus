@@ -2,13 +2,10 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Usuario from '../models/usuario';
 import Conta from '../models/conta';
-import CartaoCredito from '../models/cartaoCredito';
 import DespesaCategoria from '../models/despesaCategoria';
-import DespesaSubcategoria from '../models/despesaSubcategoria';
 import Tag from '../models/tag';
 import DespesaTipoTransacao from '../models/despesaTipoTransacao';
 import DespesaConta from '../models/despesaConta';
-import DespesaCartao from '../models/despesaCartao';
 
 dotenv.config();
 const uri = process.env.URI;
