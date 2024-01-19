@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import DespesaConta from '../models/despesaConta';
 import mongoose from 'mongoose';
+import Conta from '../models/conta';
 
 const despesaContaSchema = Joi.object({
     conta: Joi.string().required(),
@@ -31,6 +32,11 @@ class DespesaContaController {
         const { error, value } = despesaContaSchema.validate(req.body, { presence: 'required' });
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
+        }
+
+        const contaExiste = await Conta.findById(value.cartaoCredito);
+        if (!contaExiste) {
+            return res.status(404).json({ error: 'Cartão de crédito não encontrado' });
         }
 
         try {

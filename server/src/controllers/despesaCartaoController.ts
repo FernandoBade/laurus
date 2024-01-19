@@ -2,15 +2,27 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import DespesaCartao from '../models/despesaCartao';
 import mongoose from 'mongoose';
+import CartaoCredito from '../models/cartaoCredito';
 
 const despesaCartaoSchema = Joi.object({
     cartaoCredito: Joi.string().required(),
     valor: Joi.number().required(),
     dataTransacao: Joi.date().iso().required(),
-    categoria: Joi.string().required(),
-    subcategoria: Joi.string().allow(null).optional(),
-    tipoTransacao: Joi.string().required(),
+    despesaCategoria: Joi.string().required(),
+    despesaSubcategoria: Joi.string().allow(null).optional(),
+    despesaTipoTransacao: Joi.string().required(),
     tags: Joi.array().items(Joi.string()).optional(),
+    parcelamento: Joi.boolean().optional(),
+    numeroParcelaAtual: Joi.when('parcelamento', {
+        is: true,
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden()
+    }),
+    totalParcelas: Joi.when('parcelamento', {
+        is: true,
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden()
+    }),
     observacao: Joi.string().allow('').optional(),
 });
 
@@ -18,10 +30,21 @@ const despesaCartaoUpdateSchema = Joi.object({
     cartaoCredito: Joi.string().optional(),
     valor: Joi.number().optional(),
     dataTransacao: Joi.date().iso().optional(),
-    categoria: Joi.string().optional(),
-    subcategoria: Joi.string().allow(null).optional(),
-    tipoTransacao: Joi.string().optional(),
+    despesaCategoria: Joi.string().optional(),
+    despesaSubcategoria: Joi.string().allow(null).optional(),
+    despesaTipoTransacao: Joi.string().optional(),
     tags: Joi.array().items(Joi.string()).optional(),
+    parcelamento: Joi.boolean().optional(),
+    numeroParcelaAtual: Joi.when('parcelamento', {
+        is: true,
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden()
+    }),
+    totalParcelas: Joi.when('parcelamento', {
+        is: true,
+        then: Joi.number().required(),
+        otherwise: Joi.forbidden()
+    }),
     observacao: Joi.string().allow('').optional(),
 }).min(1);
 
@@ -32,6 +55,11 @@ class DespesaCartaoController {
             return res.status(400).json({ error: error.details[0].message });
         }
 
+        const cartaoExiste = await CartaoCredito.findById(value.cartaoCredito);
+        if (!cartaoExiste) {
+            return res.status(404).json({ error: 'Cartão de crédito não encontrado' });
+        }
+        
         try {
             const novaDespesaCartao = new DespesaCartao({
                 ...value,
@@ -104,11 +132,14 @@ class DespesaCartaoController {
         try {
             const updateObj = {
                 ...value,
-                cartao: value.cartao ? new mongoose.Types.ObjectId(value.cartao) : undefined,
+                cartaoCredito: value.cartaoCredito ? new mongoose.Types.ObjectId(value.cartaoCredito) : undefined,
                 despesaCategoria: value.despesaCategoria ? new mongoose.Types.ObjectId(value.despesaCategoria) : undefined,
                 despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : undefined,
                 despesaTipoTransacao: value.despesaTipoTransacao ? new mongoose.Types.ObjectId(value.despesaTipoTransacao) : undefined,
-                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
+                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined,
+                parcelamento: value.parcelamento,
+                numeroParcelaAtual: value.parcelamento ? value.numeroParcelaAtual : undefined,
+                totalParcelas: value.parcelamento ? value.totalParcelas : undefined
             };
 
             const despesaCartaoAtualizada = await DespesaCartao.findByIdAndUpdate(id, updateObj, { new: true });
