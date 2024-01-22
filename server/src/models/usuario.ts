@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const usuarioSchema = new mongoose.Schema({
-    nomeCompleto: { type: String, required: true },
+    nome: { type: String, required: true },
+    sobrenome: { type: String, required: true},
     email: { type: String, required: true, unique: true },
     telefone: { type: String },
     senha: { type: String, required: true },
@@ -22,8 +23,8 @@ usuarioSchema.pre('save', async function (next) {
     next();
 });
 
-usuarioSchema.methods.verificarSenha = function (senhaCandidata: string) {
-    return bcrypt.compare(senhaCandidata, this.senha);
+usuarioSchema.methods.verificarSenha = function (senhaNova: string) {
+    return bcrypt.compare(senhaNova, this.senha);
 };
 
 const Usuario = mongoose.model('Usuario', usuarioSchema, 'Usuario');
