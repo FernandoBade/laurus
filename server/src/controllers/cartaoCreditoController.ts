@@ -29,6 +29,10 @@ class CartaoCreditoController {
 
             const novoCartaoCredito = new CartaoCredito(value);
             await novoCartaoCredito.save();
+
+            usuarioExistente.cartoesDeCredito.push(novoCartaoCredito._id);
+            await usuarioExistente.save();
+
             res.status(201).json(novoCartaoCredito);
         } catch (e: any) {
             res.status(500).json({ error: e.message });
@@ -72,9 +76,18 @@ class CartaoCreditoController {
     static async excluirCartaoCredito(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const cartaoCredito = await CartaoCredito.findByIdAndDelete(id);
+            const cartaoCredito = await CartaoCredito.findById(id).populate('usuario', 'nome');
             if (!cartaoCredito) return res.status(404).json({ error: 'Cartão de crédito não encontrado' });
-            res.status(200).json({ message: 'Cartão de crédito excluído com sucesso' });
+
+            const nomeUsuario = cartaoCredito.usuario && 'nome' in cartaoCredito.usuario ? cartaoCredito.usuario['nome'] : 'Desconhecido';
+
+            await CartaoCredito.findByIdAndDelete(id);
+
+            if (cartaoCredito.usuario && cartaoCredito.usuario._id) {
+                await Usuario.findByIdAndUpdate(cartaoCredito.usuario._id, { $pull: { cartoesDeCredito: cartaoCredito._id } });
+            }
+
+            res.status(200).json({ message: `Cartão de crédito excluído com sucesso, e vínculo com ${nomeUsuario} removido.` });
         } catch (e) {
             res.status(500).json({ error: 'Erro ao excluir cartão de crédito' });
         }

@@ -11,9 +11,7 @@ const usuarioSchema = new mongoose.Schema({
     contas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Conta' }],
     cartoesDeCredito: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartaoCredito' }],
     despesaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCategoria' }],
-    despesaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria' }],
     receitaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCategoria' }],
-    receitaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria' }],
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }]
 });
 

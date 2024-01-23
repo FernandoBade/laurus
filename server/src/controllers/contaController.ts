@@ -29,6 +29,10 @@ class ContaController {
 
             const novaConta = new Conta(value);
             await novaConta.save();
+
+            usuarioExistente.contas.push(novaConta._id);
+            await usuarioExistente.save();
+
             res.status(201).json(novaConta);
         } catch (e: any) {
             res.status(500).json({ error: e.message });
@@ -72,9 +76,18 @@ class ContaController {
     static async excluirConta(req: Request, res: Response) {
         const { id } = req.params;
         try {
-            const conta = await Conta.findByIdAndDelete(id);
+            const conta = await Conta.findById(id).populate('usuario', 'nome');
             if (!conta) return res.status(404).json({ error: 'Conta não encontrada' });
-            res.status(200).json({ message: 'Conta excluída com sucesso' });
+
+            const nomeUsuario = conta.usuario && 'nome' in conta.usuario ? conta.usuario['nome'] : 'Desconhecido';
+
+            await Conta.findByIdAndDelete(id);
+
+            if (conta.usuario && conta.usuario._id) {
+                await Usuario.findByIdAndUpdate(conta.usuario._id, { $pull: { contas: conta._id } });
+            }
+
+            res.status(200).json({ message: `Conta excluída com sucesso, e vínculo com ${nomeUsuario} removido.` });
         } catch (e) {
             res.status(500).json({ error: 'Erro ao excluir conta' });
         }

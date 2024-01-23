@@ -6,6 +6,8 @@ import usuarioRoutes from './routes/usuarioRoutes';
 import cartaoCreditoRoutes from './routes/cartaoCreditoRoutes';
 import contaRoutes from './routes/contaRoutes';
 import authRoutes from './routes/authRoutes';
+import despesaCategoriaRoutes from './routes/despesaCategoriaRoutes';
+import despesaSubcategoriaRoutes from './routes/despesaSubcategoriaRoutes';
 
 require('dotenv').config();
 
@@ -20,9 +22,11 @@ const app = express();
 
 app.use(express.json());
 
+app.use('/api/usuario', usuarioRoutes);
 app.use('/api/despesaConta', despesaContaRoutes);
 app.use('/api/despesaCartao', despesaCartaoRoutes);
-app.use('/api/usuario', usuarioRoutes);
+app.use('/api/despesaCategoria', despesaCategoriaRoutes);
+app.use('/api/despesaSubcategoria', despesaSubcategoriaRoutes);
 app.use('/api/conta', contaRoutes);
 app.use('/api/cartaoCredito', cartaoCreditoRoutes);
 app.use('/api/auth', authRoutes);
