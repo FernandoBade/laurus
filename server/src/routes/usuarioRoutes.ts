@@ -5,9 +5,9 @@ const router = express.Router();
 
 router.post('/cadastro', UsuarioController.cadastrarUsuario);
 router.get('/', UsuarioController.listarUsuarios);
-router.get('/:id', UsuarioController.buscarUsuarioPorId);
-router.get('/nome/:nome', UsuarioController.buscarUsuarioPorNome);
-router.get('/email/:email', UsuarioController.buscarUsuarioPorEmail);
+router.get('/:id', UsuarioController.obterUsuarioPorId);
+router.get('/nome/:nome', UsuarioController.obterUsuarioPorNome);
+router.get('/email/:email', UsuarioController.obterUsuarioPorEmail);
 router.put('/:id', UsuarioController.atualizarUsuario);
 router.delete('/:id', UsuarioController.excluirUsuario);
 

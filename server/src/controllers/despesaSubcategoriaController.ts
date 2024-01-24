@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import DespesaSubcategoria from '../models/despesaSubcategoria';
 import DespesaCategoria from '../models/despesaCategoria';
-import Usuario from '../models/usuario';
 
 const despesaSubcategoriaSchema = Joi.object({
     nome: Joi.string().required(),
@@ -11,7 +10,8 @@ const despesaSubcategoriaSchema = Joi.object({
 });
 
 const despesaSubcategoriaUpdateSchema = Joi.object({
-    nome: Joi.string().optional()
+    nome: Joi.string().optional(),
+    categoria: Joi.string().required(),
 }).min(1);
 
 class DespesaSubcategoriaController {
@@ -65,7 +65,6 @@ class DespesaSubcategoriaController {
         }
     }
 
-
     static async excluirDespesaSubcategoria(req: Request, res: Response) {
         const { id } = req.params;
         try {
@@ -80,7 +79,7 @@ class DespesaSubcategoriaController {
                 await DespesaCategoria.findByIdAndUpdate(despesaSubcategoria.categoria._id, { $pull: { despesaSubcategorias: id } });
             }
 
-            res.status(200).json({ message: `Subcategoria de despesa excluída com sucesso. Vínculo removido com a categoria ${nomeCategoria}` });
+            res.status(200).json({ message: `Subcategoria de despesa excluída com sucesso e vínculo removido com a categoria ${nomeCategoria}` });
         } catch (e) {
             res.status(500).json({ error: 'Erro ao excluir subcategoria de despesa' });
         }

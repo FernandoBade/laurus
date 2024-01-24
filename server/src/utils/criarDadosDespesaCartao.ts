@@ -4,7 +4,7 @@ import CartaoCredito from '../models/cartaoCredito';
 import DespesaCategoria from '../models/despesaCategoria';
 import Tag from '../models/tag';
 import DespesaTipoTransacao from '../models/despesaTipoTransacao';
-import DespesaCartao from '../models/despesaCartao';
+import DespesaCartao from '../models/despesaCartaoCredito';
 import { selecionarTagsAleatorias, gerarNumeroAleatorio } from './commons';
 
 dotenv.config();

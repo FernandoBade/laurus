@@ -81,7 +81,7 @@ class DespesaCategoriaController {
                 await Usuario.findByIdAndUpdate(despesaCategoria.usuario._id, { $pull: { despesaCategorias: despesaCategoria._id } });
             }
 
-            res.status(200).json({ message: `Categoria de despesa excluída com sucesso, e vínculo com ${nomeUsuario} removido.` });
+            res.status(200).json({ message: `Categoria de despesa excluída com sucesso e vínculo com ${nomeUsuario} removido.` });
         } catch (e) {
             res.status(500).json({ error: 'Erro ao excluir categoria de despesa' });
         }

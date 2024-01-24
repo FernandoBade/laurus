@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import Usuario from './usuario';
 
 const tagSchema = new mongoose.Schema({
     nome: { type: String, required: true },

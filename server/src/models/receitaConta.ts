@@ -6,7 +6,6 @@ const receitaContaSchema = new mongoose.Schema({
     dataTransacao: { type: Date, required: true },
     receitaCategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCategoria', required: true },
     receitaSubcategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria', required: false },
-    receitatipoTransacao: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaTipoTransacao', required: true },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
     observacao: { type: String }
 });

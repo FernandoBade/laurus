@@ -1,16 +1,15 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import DespesaCartao from '../models/despesaCartao';
 import mongoose from 'mongoose';
+import DespesaCartao from '../models/despesaCartaoCredito';
 import CartaoCredito from '../models/cartaoCredito';
 
-const despesaCartaoSchema = Joi.object({
+const despesaCartaoCreditoSchema = Joi.object({
     cartaoCredito: Joi.string().required(),
     valor: Joi.number().required(),
     dataTransacao: Joi.date().iso().required(),
     despesaCategoria: Joi.string().required(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
-    despesaTipoTransacao: Joi.string().required(),
     tags: Joi.array().items(Joi.string()).optional(),
     parcelamento: Joi.boolean().optional(),
     numeroParcelaAtual: Joi.when('parcelamento', {
@@ -26,13 +25,12 @@ const despesaCartaoSchema = Joi.object({
     observacao: Joi.string().allow('').optional(),
 });
 
-const despesaCartaoUpdateSchema = Joi.object({
+const despesaCartaoCreditoUpdateSchema = Joi.object({
     cartaoCredito: Joi.string().optional(),
     valor: Joi.number().optional(),
     dataTransacao: Joi.date().iso().optional(),
     despesaCategoria: Joi.string().optional(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
-    despesaTipoTransacao: Joi.string().optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     parcelamento: Joi.boolean().optional(),
     numeroParcelaAtual: Joi.when('parcelamento', {
@@ -48,29 +46,28 @@ const despesaCartaoUpdateSchema = Joi.object({
     observacao: Joi.string().allow('').optional(),
 }).min(1);
 
-class DespesaCartaoController {
-    static async criarDespesaCartao(req: Request, res: Response) {
-        const { error, value } = despesaCartaoSchema.validate(req.body, { presence: 'required' });
+class DespesaCartaoCreditoController {
+    static async criarDespesaCartaoCredito(req: Request, res: Response) {
+        const { error, value } = despesaCartaoCreditoSchema.validate(req.body, { presence: 'required' });
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
 
-        const cartaoExiste = await CartaoCredito.findById(value.cartaoCredito);
-        if (!cartaoExiste) {
+        const cartaoCreditoExiste = await CartaoCredito.findById(value.cartaoCredito);
+        if (!cartaoCreditoExiste) {
             return res.status(404).json({ error: 'Cartão de crédito não encontrado' });
         }
-        
+
         try {
-            const novaDespesaCartao = new DespesaCartao({
+            const novaDespesaCartaoCredito = new DespesaCartao({
                 ...value,
                 cartaoCredito: new mongoose.Types.ObjectId(value.cartaoCredito),
                 categoria: new mongoose.Types.ObjectId(value.categoria),
                 subcategoria: value.subcategoria ? new mongoose.Types.ObjectId(value.subcategoria) : null,
-                tipoTransacao: new mongoose.Types.ObjectId(value.tipoTransacao),
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
             });
-            await novaDespesaCartao.save();
-            res.status(201).json(novaDespesaCartao);
+            await novaDespesaCartaoCredito.save();
+            res.status(201).json(novaDespesaCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
                 console.error(`Erro ao criar despesa de cartão.`, error.message);
@@ -82,10 +79,10 @@ class DespesaCartaoController {
     }
 
 
-    static async listarTodasDespesasCartao(req: Request, res: Response) {
+    static async listarDespesasCartaoCredito(req: Request, res: Response) {
         try {
-            const despesasCartao = await DespesaCartao.find();
-            res.json(despesasCartao);
+            const despesasCartaoCredito = await DespesaCartao.find();
+            res.json(despesasCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
                 console.error(`Erro ao listar despesas:`, error.message);
@@ -98,13 +95,13 @@ class DespesaCartaoController {
     }
 
 
-    static async obterDespesaCartaoPorId(req: Request, res: Response) {
+    static async obterDespesaCartaoCreditoPorId(req: Request, res: Response) {
         const { id } = req.params;
 
         try {
-            const despesaCartao = await DespesaCartao.findById(id);
-            if (despesaCartao) {
-                res.json(despesaCartao);
+            const despesaCartaoCredito = await DespesaCartao.findById(id);
+            if (despesaCartaoCredito) {
+                res.json(despesaCartaoCredito);
             } else {
                 console.log(`Despesa com ID ${id} não encontrada.`);
                 res.status(404).json({ error: 'Despesa não encontrada' });
@@ -121,9 +118,9 @@ class DespesaCartaoController {
     }
 
 
-    static async atualizarDespesaCartao(req: Request, res: Response) {
+    static async atualizarDespesaCartaoCredito(req: Request, res: Response) {
         const { id } = req.params;
-        const { error, value } = despesaCartaoUpdateSchema.validate(req.body);
+        const { error, value } = despesaCartaoCreditoUpdateSchema.validate(req.body);
 
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
@@ -135,16 +132,15 @@ class DespesaCartaoController {
                 cartaoCredito: value.cartaoCredito ? new mongoose.Types.ObjectId(value.cartaoCredito) : undefined,
                 despesaCategoria: value.despesaCategoria ? new mongoose.Types.ObjectId(value.despesaCategoria) : undefined,
                 despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : undefined,
-                despesaTipoTransacao: value.despesaTipoTransacao ? new mongoose.Types.ObjectId(value.despesaTipoTransacao) : undefined,
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined,
                 parcelamento: value.parcelamento,
                 numeroParcelaAtual: value.parcelamento ? value.numeroParcelaAtual : undefined,
                 totalParcelas: value.parcelamento ? value.totalParcelas : undefined
             };
 
-            const despesaCartaoAtualizada = await DespesaCartao.findByIdAndUpdate(id, updateObj, { new: true });
-            if (despesaCartaoAtualizada) {
-                res.json(despesaCartaoAtualizada);
+            const despesaCartaoCreditoAtualizada = await DespesaCartao.findByIdAndUpdate(id, updateObj, { new: true });
+            if (despesaCartaoCreditoAtualizada) {
+                res.json(despesaCartaoCreditoAtualizada);
             } else {
                 res.status(404).json({ error: 'Despesa não encontrada.' });
             }
@@ -160,12 +156,12 @@ class DespesaCartaoController {
     }
 
 
-    static async excluirDespesaCartao(req: Request, res: Response) {
+    static async excluirDespesaCartaoCredito(req: Request, res: Response) {
         const { id } = req.params;
 
         try {
-            const despesaCartaoExcluida = await DespesaCartao.findByIdAndDelete(id);
-            if (despesaCartaoExcluida) {
+            const despesaCartaoCreditoExcluida = await DespesaCartao.findByIdAndDelete(id);
+            if (despesaCartaoCreditoExcluida) {
                 res.status(200).json({ message: 'Despesa excluída com sucesso.' });
             } else {
                 res.status(404).json({ error: 'Despesa não encontrada.' });
@@ -182,4 +178,4 @@ class DespesaCartaoController {
     }
 }
 
-export default DespesaCartaoController;
+export default DespesaCartaoCreditoController;

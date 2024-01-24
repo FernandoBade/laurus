@@ -54,7 +54,7 @@ class UsuarioController {
         }
     }
 
-    static async buscarUsuarioPorId(req: Request, res: Response) {
+    static async obterUsuarioPorId(req: Request, res: Response) {
         try {
             const usuario = await Usuario.findById(req.params.id);
             if (!usuario) {
@@ -66,7 +66,7 @@ class UsuarioController {
         }
     }
 
-    static async buscarUsuarioPorNome(req: Request, res: Response) {
+    static async obterUsuarioPorNome(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.nome, 'i');
             const usuarios = await Usuario.find({
@@ -81,7 +81,7 @@ class UsuarioController {
         }
     }
 
-    static async buscarUsuarioPorEmail(req: Request, res: Response) {
+    static async obterUsuarioPorEmail(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.email, 'i');
             const usuarios = await Usuario.find({ email: regex })

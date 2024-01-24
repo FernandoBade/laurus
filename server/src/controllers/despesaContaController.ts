@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import DespesaConta from '../models/despesaConta';
 import mongoose from 'mongoose';
+import DespesaConta from '../models/despesaConta';
 import Conta from '../models/conta';
 
 const despesaContaSchema = Joi.object({
@@ -10,7 +10,6 @@ const despesaContaSchema = Joi.object({
     dataTransacao: Joi.date().iso().required(),
     despesaCategoria: Joi.string().required(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
-    despesaTipoTransacao: Joi.string().required(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
 });
@@ -21,7 +20,6 @@ const despesaContaUpdateSchema = Joi.object({
     dataTransacao: Joi.date().iso().optional(),
     despesaCategoria: Joi.string().optional(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
-    despesaTipoTransacao: Joi.string().optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
 }).min(1);
@@ -34,9 +32,9 @@ class DespesaContaController {
             return res.status(400).json({ error: error.details[0].message });
         }
 
-        const contaExiste = await Conta.findById(value.cartaoCredito);
+        const contaExiste = await Conta.findById(value.conta);
         if (!contaExiste) {
-            return res.status(404).json({ error: 'Cartão de crédito não encontrado' });
+            return res.status(404).json({ error: 'Conta não encontrada.' });
         }
 
         try {
@@ -45,7 +43,6 @@ class DespesaContaController {
                 conta: new mongoose.Types.ObjectId(value.conta),
                 despesaCategoria: new mongoose.Types.ObjectId(value.despesaCategoria),
                 despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : null,
-                despesaTipoTransacao: new mongoose.Types.ObjectId(value.despesaTipoTransacao),
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
             });
             await novaDespesaConta.save();
@@ -62,7 +59,7 @@ class DespesaContaController {
     }
 
 
-    static async listarTodasDespesasConta(req: Request, res: Response) {
+    static async listarDespesasConta(req: Request, res: Response) {
         try {
             const despesasConta = await DespesaConta.find();
             res.json(despesasConta);
@@ -115,7 +112,6 @@ class DespesaContaController {
                 conta: value.conta ? new mongoose.Types.ObjectId(value.conta) : undefined,
                 despesaCategoria: value.despesaCategoria ? new mongoose.Types.ObjectId(value.despesaCategoria) : undefined,
                 despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : undefined,
-                despesaTipoTransacao: value.despesaTipoTransacao ? new mongoose.Types.ObjectId(value.despesaTipoTransacao) : undefined,
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
             };
 
