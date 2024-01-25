@@ -10,6 +10,6 @@ const receitaCartaoCreditoSchema = new mongoose.Schema({
     observacao: { type: String, required: false },
 });
 
-const ReceitaCartao = mongoose.model('ReceitaCartaoCredito', receitaCartaoCreditoSchema, 'ReceitaCartaoCredito');
+const ReceitaCartaoCredito = mongoose.model('ReceitaCartaoCredito', receitaCartaoCreditoSchema, 'ReceitaCartaoCredito');
 
-export default ReceitaCartao;
+export default ReceitaCartaoCredito;

@@ -5,6 +5,8 @@ const contaSchema = new mongoose.Schema({
     banco: { type: String, required: true },
     tipoConta: { type: String, enum: ['Corrente', 'Salário', 'Poupança', 'Investimento'], required: true },
     observacao: { type: String },
+    despesasConta: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaConta' }],
+    receitasConta: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaConta' }],
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
 });
 

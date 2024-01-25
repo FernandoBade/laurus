@@ -42,9 +42,13 @@ class ReceitaContaController {
                 conta: new mongoose.Types.ObjectId(value.conta),
                 receitaCategoria: new mongoose.Types.ObjectId(value.receitaCategoria),
                 receitaSubcategoria: value.receitaSubcategoria ? new mongoose.Types.ObjectId(value.receitaSubcategoria) : null,
-                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
+                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined,
+                observacao: Joi.string().allow('').optional(),
             });
             await novaReceitaConta.save();
+            await Conta.findByIdAndUpdate(value.conta, { $push: { receitasConta: novaReceitaConta._id } });
+
+
             res.status(201).json(novaReceitaConta);
         } catch (error) {
             if (error instanceof Error) {
@@ -128,12 +132,20 @@ class ReceitaContaController {
         const { id } = req.params;
 
         try {
-            const receitaContaExcluida = await ReceitaConta.findByIdAndDelete(id);
-            if (receitaContaExcluida) {
-                res.status(200).json({ message: 'Receita excluída com sucesso.' });
-            } else {
-                res.status(404).json({ error: 'Receita não encontrada.' });
+            const receitaConta = await ReceitaConta.findById(id).populate('conta', 'nome');
+            if (!receitaConta) {
+                return res.status(404).json({ error: 'Receita não encontrada.' });
             }
+
+            const nomeConta = receitaConta.conta && 'nome' in receitaConta.conta ? receitaConta.conta['nome'] : 'Desconhecida';
+
+            await ReceitaConta.findByIdAndDelete(id);
+
+            if (receitaConta.conta && receitaConta.conta._id) {
+                await Conta.findByIdAndUpdate(receitaConta.conta._id, { $pull: { receitasConta: id } });
+            }
+
+            res.status(200).json({ message: `Receita excluída com sucesso e vínculo removido da conta ${nomeConta}.` });
         } catch (error) {
             if (error instanceof Error) {
                 console.error(`Erro ao excluir receita com o ID ${id}:`, error.message);

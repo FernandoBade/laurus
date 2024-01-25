@@ -88,8 +88,13 @@ class ContaController {
             }
 
             res.status(200).json({ message: `Conta excluída com sucesso, e vínculo com ${nomeUsuario} removido.` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir conta' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir conta com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir conta.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

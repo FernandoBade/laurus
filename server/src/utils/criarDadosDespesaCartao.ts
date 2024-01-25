@@ -4,7 +4,7 @@ import CartaoCredito from '../models/cartaoCredito';
 import DespesaCategoria from '../models/despesaCategoria';
 import Tag from '../models/tag';
 import DespesaTipoTransacao from '../models/despesaTipoTransacao';
-import DespesaCartao from '../models/despesaCartaoCredito';
+import DespesaCartaoCredito from '../models/despesaCartaoCredito';
 import { selecionarTagsAleatorias, gerarNumeroAleatorio } from './commons';
 
 dotenv.config();
@@ -61,7 +61,7 @@ async function criarMassaDeDados() {
             }
         }
 
-        const novaDespesaCartao = new DespesaCartao({
+        const novaDespesaCartao = new DespesaCartaoCredito({
             cartaoCredito: cartaoAleatorio._id,
             valor: valor,
             dataTransacao: dataAleatoria,

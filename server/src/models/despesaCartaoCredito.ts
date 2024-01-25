@@ -13,6 +13,6 @@ const despesaCartaoCreditoSchema = new mongoose.Schema({
     observacao: { type: String, required: false },
 });
 
-const DespesaCartao = mongoose.model('DespesaCartaoCredito', despesaCartaoCreditoSchema, 'DespesaCartaoCredito');
+const DespesaCartaoCredito = mongoose.model('DespesaCartaoCredito', despesaCartaoCreditoSchema, 'DespesaCartaoCredito');
 
-export default DespesaCartao;
+export default DespesaCartaoCredito;

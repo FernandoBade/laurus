@@ -22,9 +22,9 @@
 - [x] Remoção do tipoTransação tanto das despesas quanto das receitas;\
 - [x] Ajustar os vínculos e interdependências;
     - [x] Vincular as subcategorias às categorias e não ao usuários;
-    - [ ] Vincular as despesas e receitas de conta às contas;
-    - [ ] Vincular as despesas e receitas de cartão de crédito aos cartões;
-    - [ ] Ajustar os métodos de criação e exclusão para adicionarem/removerem os vínculos;
+    - [x] Vincular as despesas e receitas de conta às contas;
+    - [x] Vincular as despesas e receitas de cartão de crédito aos cartões;
+    - [x] Ajustar os métodos de criação e exclusão para adicionarem/removerem os vínculos;
 - [ ] Limpar o banco e criar uma nova base sólida;
 - [ ] Retestar as conexões via Insomnia;
 - [ ] Instalar os pacotes para o front-end;

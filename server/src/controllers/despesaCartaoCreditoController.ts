@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
-import DespesaCartao from '../models/despesaCartaoCredito';
+import DespesaCartaoCredito from '../models/despesaCartaoCredito';
 import CartaoCredito from '../models/cartaoCredito';
 
 const despesaCartaoCreditoSchema = Joi.object({
@@ -59,7 +59,7 @@ class DespesaCartaoCreditoController {
         }
 
         try {
-            const novaDespesaCartaoCredito = new DespesaCartao({
+            const novaDespesaCartaoCredito = new DespesaCartaoCredito({
                 ...value,
                 cartaoCredito: new mongoose.Types.ObjectId(value.cartaoCredito),
                 categoria: new mongoose.Types.ObjectId(value.categoria),
@@ -67,6 +67,8 @@ class DespesaCartaoCreditoController {
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
             });
             await novaDespesaCartaoCredito.save();
+            await CartaoCredito.findByIdAndUpdate(value.cartaoCredito, { $push: { despesasCartaoCredito: novaDespesaCartaoCredito._id } });
+
             res.status(201).json(novaDespesaCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
@@ -81,7 +83,7 @@ class DespesaCartaoCreditoController {
 
     static async listarDespesasCartaoCredito(req: Request, res: Response) {
         try {
-            const despesasCartaoCredito = await DespesaCartao.find();
+            const despesasCartaoCredito = await DespesaCartaoCredito.find();
             res.json(despesasCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
@@ -99,7 +101,7 @@ class DespesaCartaoCreditoController {
         const { id } = req.params;
 
         try {
-            const despesaCartaoCredito = await DespesaCartao.findById(id);
+            const despesaCartaoCredito = await DespesaCartaoCredito.findById(id);
             if (despesaCartaoCredito) {
                 res.json(despesaCartaoCredito);
             } else {
@@ -138,7 +140,7 @@ class DespesaCartaoCreditoController {
                 totalParcelas: value.parcelamento ? value.totalParcelas : undefined
             };
 
-            const despesaCartaoCreditoAtualizada = await DespesaCartao.findByIdAndUpdate(id, updateObj, { new: true });
+            const despesaCartaoCreditoAtualizada = await DespesaCartaoCredito.findByIdAndUpdate(id, updateObj, { new: true });
             if (despesaCartaoCreditoAtualizada) {
                 res.json(despesaCartaoCreditoAtualizada);
             } else {
@@ -155,21 +157,27 @@ class DespesaCartaoCreditoController {
         }
     }
 
-
     static async excluirDespesaCartaoCredito(req: Request, res: Response) {
         const { id } = req.params;
 
         try {
-            const despesaCartaoCreditoExcluida = await DespesaCartao.findByIdAndDelete(id);
-            if (despesaCartaoCreditoExcluida) {
-                res.status(200).json({ message: 'Despesa excluída com sucesso.' });
-            } else {
-                res.status(404).json({ error: 'Despesa não encontrada.' });
+            const despesaCartaoCredito = await DespesaCartaoCredito.findById(id).populate('cartaoCredito', 'nome');
+            if (!despesaCartaoCredito) {
+                return res.status(404).json({ error: 'Despesa de cartão de crédito não encontrada.' });
             }
+
+            const nomeCartaoCredito = despesaCartaoCredito.cartaoCredito && 'nome' in despesaCartaoCredito.cartaoCredito ? despesaCartaoCredito.cartaoCredito['nome'] : 'Desconhecido';
+
+            await DespesaCartaoCredito.findByIdAndDelete(id);
+
+            if (despesaCartaoCredito.cartaoCredito && despesaCartaoCredito.cartaoCredito._id) {
+                await CartaoCredito.findByIdAndUpdate(despesaCartaoCredito.cartaoCredito._id, { $pull: { despesasCartaoCredito: id } });
+            }
+
+            res.status(200).json({ message: `Despesa de cartão de crédito excluída com sucesso do cartão ${nomeCartaoCredito}.` });
         } catch (error) {
             if (error instanceof Error) {
-                console.error(`Erro ao excluir despesa com o ID ${id}:`, error.message);
-                console.error(error.stack);
+                console.error(`Erro ao excluir a despesa com o ID ${id}:`, error.message);
                 res.status(400 | 401).json({ error: 'Erro ao excluir despesa.', errorMessage: error.message });
             } else {
                 res.status(500).json({ error: 'Erro interno do servidor.' });

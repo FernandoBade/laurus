@@ -88,8 +88,13 @@ class CartaoCreditoController {
             }
 
             res.status(200).json({ message: `Cartão de crédito excluído com sucesso, e vínculo com ${nomeUsuario} removido.` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir cartão de crédito' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir o cartão de crédito com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir o cartão de crédito.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

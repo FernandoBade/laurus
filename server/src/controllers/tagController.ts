@@ -82,8 +82,13 @@ class TagController {
             }
 
             res.status(200).json({ message: `Tag excluída com sucesso e vínculo com ${nomeUsuario} removido.` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir tag' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir tag com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir tag.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

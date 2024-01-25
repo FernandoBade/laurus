@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import ReceitaCategoria from '../models/receitaCategoria'; // Ajuste o caminho do modelo conforme necessário
+import ReceitaCategoria from '../models/receitaCategoria';
 import Usuario from '../models/usuario';
 
 const receitaCategoriaSchema = Joi.object({
@@ -24,7 +24,7 @@ class ReceitaCategoriaController {
             const novaReceitaCategoria = new ReceitaCategoria(value);
             await novaReceitaCategoria.save();
 
-            usuarioExistente.receitaCategorias.push(novaReceitaCategoria._id); // Ajuste conforme o seu schema de Usuário
+            usuarioExistente.receitaCategorias.push(novaReceitaCategoria._id);
             await usuarioExistente.save();
 
             res.status(201).json(novaReceitaCategoria);
@@ -78,12 +78,17 @@ class ReceitaCategoriaController {
             await ReceitaCategoria.findByIdAndDelete(id);
 
             if (receitaCategoria.usuario && receitaCategoria.usuario._id) {
-                await Usuario.findByIdAndUpdate(receitaCategoria.usuario._id, { $pull: { receitaCategorias: receitaCategoria._id } }); 
+                await Usuario.findByIdAndUpdate(receitaCategoria.usuario._id, { $pull: { receitaCategorias: receitaCategoria._id } });
             }
 
             res.status(200).json({ message: `Categoria de receita excluída com sucesso e vínculo com ${nomeUsuario} removido.` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir categoria de receita' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir categoria com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir categoria.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

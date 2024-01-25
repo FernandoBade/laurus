@@ -24,7 +24,6 @@ const despesaContaUpdateSchema = Joi.object({
     observacao: Joi.string().allow('').optional(),
 }).min(1);
 
-
 class DespesaContaController {
     static async criarDespesaConta(req: Request, res: Response) {
         const { error, value } = despesaContaSchema.validate(req.body, { presence: 'required' });
@@ -46,6 +45,8 @@ class DespesaContaController {
                 tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
             });
             await novaDespesaConta.save();
+            await Conta.findByIdAndUpdate(value.conta, { $push: { despesasConta: novaDespesaConta._id } });
+
             res.status(201).json(novaDespesaConta);
         } catch (error) {
             if (error instanceof Error) {
@@ -57,7 +58,6 @@ class DespesaContaController {
             }
         }
     }
-
 
     static async listarDespesasConta(req: Request, res: Response) {
         try {
@@ -73,7 +73,6 @@ class DespesaContaController {
             }
         }
     }
-
 
     static async obterDespesaContaPorId(req: Request, res: Response) {
         const { id } = req.params;
@@ -96,7 +95,6 @@ class DespesaContaController {
             }
         }
     }
-
 
     static async atualizarDespesaConta(req: Request, res: Response) {
         const { id } = req.params;
@@ -132,21 +130,27 @@ class DespesaContaController {
         }
     }
 
-
     static async excluirDespesaConta(req: Request, res: Response) {
         const { id } = req.params;
 
         try {
-            const despesaContaExcluida = await DespesaConta.findByIdAndDelete(id);
-            if (despesaContaExcluida) {
-                res.status(200).json({ message: 'Despesa excluída com sucesso.' });
-            } else {
-                res.status(404).json({ error: 'Despesa não encontrada.' });
+            const despesaConta = await DespesaConta.findById(id).populate('conta', 'nome');
+            if (!despesaConta) {
+                return res.status(404).json({ error: 'Despesa não encontrada.' });
             }
+
+            const nomeConta = despesaConta.conta && 'nome' in despesaConta.conta ? despesaConta.conta['nome'] : 'Desconhecida';
+
+            await DespesaConta.findByIdAndDelete(id);
+
+            if (despesaConta.conta && despesaConta.conta._id) {
+                await Conta.findByIdAndUpdate(despesaConta.conta._id, { $pull: { despesasConta: id } });
+            }
+
+            res.status(200).json({ message: `DespesaConta excluída com sucesso e vínculo removido da conta ${nomeConta}.` });
         } catch (error) {
             if (error instanceof Error) {
-                console.error(`Erro ao excluir despesa com o ID ${id}:`, error.message);
-                console.error(error.stack);
+                console.error(`Erro ao excluir a despesa com o ID ${id}:`, error.message);
                 res.status(400 | 401).json({ error: 'Erro ao excluir despesa.', errorMessage: error.message });
             } else {
                 res.status(500).json({ error: 'Erro interno do servidor.' });

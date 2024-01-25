@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
-import ReceitaCartao from '../models/receitaCartaoCredito';
+import ReceitaCartaoCredito from '../models/receitaCartaoCredito';
 import CartaoCredito from '../models/cartaoCredito';
 
 const receitaCartaoCreditoSchema = Joi.object({
@@ -37,7 +37,7 @@ class ReceitaCartaoCreditoController {
         }
 
         try {
-            const novaReceitaCartaoCredito = new ReceitaCartao({
+            const novaReceitaCartaoCredito = new ReceitaCartaoCredito({
                 ...value,
                 cartaoCredito: new mongoose.Types.ObjectId(value.cartaoCredito),
                 receitaCategoria: new mongoose.Types.ObjectId(value.receitaCategoria),
@@ -46,6 +46,8 @@ class ReceitaCartaoCreditoController {
                 observacao: value.observacao
             });
             await novaReceitaCartaoCredito.save();
+            await CartaoCredito.findByIdAndUpdate(value.cartaoCredito, { $push: { receitasCartaoCredito: novaReceitaCartaoCredito } });
+
             res.status(201).json(novaReceitaCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
@@ -59,7 +61,7 @@ class ReceitaCartaoCreditoController {
 
     static async listarReceitasCartaoCredito(req: Request, res: Response) {
         try {
-            const receitasCartaoCredito = await ReceitaCartao.find();
+            const receitasCartaoCredito = await ReceitaCartaoCredito.find();
             res.json(receitasCartaoCredito);
         } catch (error) {
             if (error instanceof Error) {
@@ -75,7 +77,7 @@ class ReceitaCartaoCreditoController {
         const { id } = req.params;
 
         try {
-            const receitaCartaoCredito = await ReceitaCartao.findById(id);
+            const receitaCartaoCredito = await ReceitaCartaoCredito.findById(id);
             if (receitaCartaoCredito) {
                 res.json(receitaCartaoCredito);
             } else {
@@ -110,7 +112,7 @@ class ReceitaCartaoCreditoController {
                 observacao: value.observacao
             };
 
-            const receitaCartaoCreditoAtualizada = await ReceitaCartao.findByIdAndUpdate(id, updateObj, { new: true });
+            const receitaCartaoCreditoAtualizada = await ReceitaCartaoCredito.findByIdAndUpdate(id, updateObj, { new: true });
             if (receitaCartaoCreditoAtualizada) {
                 res.json(receitaCartaoCreditoAtualizada);
             } else {
@@ -130,12 +132,20 @@ class ReceitaCartaoCreditoController {
         const { id } = req.params;
 
         try {
-            const receitaCartaoCreditoExcluida = await ReceitaCartao.findByIdAndDelete(id);
-            if (receitaCartaoCreditoExcluida) {
-                res.status(200).json({ message: 'Receita excluída com sucesso.' });
-            } else {
-                res.status(404).json({ error: 'Receita não encontrada.' });
+            const receitaCartaoCredito = await ReceitaCartaoCredito.findById(id).populate('cartaoCredito', 'nome');
+            if (!receitaCartaoCredito) {
+                return res.status(404).json({ error: 'Receita de cartão de crédito não encontrada.' });
             }
+
+            const nomeCartaoCredito = receitaCartaoCredito.cartaoCredito && 'nome' in receitaCartaoCredito.cartaoCredito ? receitaCartaoCredito.cartaoCredito['nome'] : 'Desconhecido';
+
+            await ReceitaCartaoCredito.findByIdAndDelete(id);
+
+            if (receitaCartaoCredito.cartaoCredito && receitaCartaoCredito.cartaoCredito._id) {
+                await CartaoCredito.findByIdAndUpdate(receitaCartaoCredito.cartaoCredito._id, { $pull: { receitasCartaoCredito: id } });
+            }
+
+            res.status(200).json({ message: `Receita de cartão de crédito excluída com sucesso do cartão ${nomeCartaoCredito}.` });
         } catch (error) {
             if (error instanceof Error) {
                 console.error(`Erro ao excluir receita com o ID ${id}:`, error.message);

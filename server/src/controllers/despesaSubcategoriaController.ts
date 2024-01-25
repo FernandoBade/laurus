@@ -80,8 +80,13 @@ class DespesaSubcategoriaController {
             }
 
             res.status(200).json({ message: `Subcategoria de despesa excluída com sucesso e vínculo removido com a categoria ${nomeCategoria}` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir subcategoria de despesa' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir a subcategoria com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir subcategoria.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

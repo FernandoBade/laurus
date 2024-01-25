@@ -119,6 +119,7 @@ class UsuarioController {
 
 
     static async excluirUsuario(req: Request, res: Response) {
+        const { id } = req.params;
         try {
             const deletado = await Usuario.findByIdAndDelete(req.params.id);
             if (!deletado) {
@@ -126,7 +127,12 @@ class UsuarioController {
             }
             res.json({ mensagem: 'Usuário excluído com sucesso.' });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao excluir usuário.', erro: error });
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir usuário com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir usuario.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }

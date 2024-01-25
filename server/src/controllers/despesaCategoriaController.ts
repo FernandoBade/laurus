@@ -82,8 +82,13 @@ class DespesaCategoriaController {
             }
 
             res.status(200).json({ message: `Categoria de despesa excluída com sucesso e vínculo com ${nomeUsuario} removido.` });
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao excluir categoria de despesa' });
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`Erro ao excluir categoria com o ID ${id}:`, error.message);
+                res.status(400 | 401).json({ error: 'Erro ao excluir categoria.', errorMessage: error.message });
+            } else {
+                res.status(500).json({ error: 'Erro interno do servidor.' });
+            }
         }
     }
 }
