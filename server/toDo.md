@@ -25,6 +25,9 @@
     - [x] Vincular as despesas e receitas de conta às contas;
     - [x] Vincular as despesas e receitas de cartão de crédito aos cartões;
     - [x] Ajustar os métodos de criação e exclusão para adicionarem/removerem os vínculos;
+- [ ] Refatorar os métodos de criação;
+- [ ] Criar um padrão de erros, logs, catch, etc;
+- [ ] Verificar a implantação de um sitema I18N;
 - [ ] Limpar o banco e criar uma nova base sólida;
 - [ ] Retestar as conexões via Insomnia;
 - [ ] Instalar os pacotes para o front-end;

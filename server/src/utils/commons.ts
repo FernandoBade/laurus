@@ -16,3 +16,15 @@ export function gerarNumeroAleatorio(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boolean) {
+    const dataAtual = new Date();
+    const diasAleatorios = Math.floor(Math.random() * dias);
+
+    if (passadoOuFuturo === -1) {
+        dataAtual.setDate(dataAtual.getDate() - diasAleatorios);
+    } else if (passadoOuFuturo === 1) {
+        dataAtual.setDate(dataAtual.getDate() + diasAleatorios);
+    }
+
+    return dataAtual;
+}
