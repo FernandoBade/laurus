@@ -1,15 +1,13 @@
 import mongoose from 'mongoose';
 import { conectar, desconectar } from './criarConexaoBanco';
-import DespesaCategoria from '../models/despesaCategoria';
-import DespesaSubcategoria from '../models/despesaSubcategoria';
+import ReceitaCategoria from '../models/receitaCategoria';
+import ReceitaSubcategoria from '../models/receitaSubcategoria';
 
-async function criarDespesaCategoriasESubcategorias() {
-    const categoriasNomes = ['Saúde1', 'Entretenimento1', 'Rolê1', 'Vestuário1'] as const;
+async function criarReceitaCategoriasESubcategorias() {
+    const categoriasNomes = ['Bônus', 'Freela'] as const;
     const subcategorias = {
-        'Saúde1': ['Vitamina1', 'Remédio1'],
-        'Entretenimento1': ['Cinema1', 'Shows1'],
-        'Rolê1': ['Boliche1', 'Fliperama1'],
-        'Vestuário1': ['Roupas1', 'Calçados1']
+        'Bônus': ['Metas', 'Revendas'],
+        'Freela': ['Silv', 'Vinix']
     };
 
     const usuarioId = process.env.USER_ID;
@@ -18,14 +16,14 @@ async function criarDespesaCategoriasESubcategorias() {
 
     try {
         for (const categoriaNome of categoriasNomes) {
-            const novaCategoria = new DespesaCategoria({ nome: categoriaNome, usuario: usuarioId });
+            const novaCategoria = new ReceitaCategoria({ nome: categoriaNome, usuario: usuarioId });
             await novaCategoria.save();
 
             const subcategoriaNomes = subcategorias[categoriaNome as keyof typeof subcategorias];
             const subcategoriaIds = [];
 
             for (const subcategoriaNome of subcategoriaNomes) {
-                const novaSubcategoria = new DespesaSubcategoria({
+                const novaSubcategoria = new ReceitaSubcategoria({
                     nome: subcategoriaNome,
                     categoria: novaCategoria._id,
                     usuario: usuarioId
@@ -34,7 +32,7 @@ async function criarDespesaCategoriasESubcategorias() {
                 subcategoriaIds.push(novaSubcategoria._id);
             }
 
-            await DespesaCategoria.findByIdAndUpdate(novaCategoria._id, {
+            await ReceitaCategoria.findByIdAndUpdate(novaCategoria._id, {
                 $push: { receitaSubcategorias: { $each: subcategoriaIds } }
             });
         }
@@ -47,4 +45,4 @@ async function criarDespesaCategoriasESubcategorias() {
     }
 }
 
-criarDespesaCategoriasESubcategorias().catch(console.error);
+criarReceitaCategoriasESubcategorias().catch(console.error);

@@ -23,7 +23,7 @@ class DespesaSubcategoriaController {
             const novaDespesaSubcategoria = new DespesaSubcategoria(value);
             await novaDespesaSubcategoria.save();
 
-            await DespesaCategoria.findByIdAndUpdate(value.categoria, { $push: { despesaSubcategorias: novaDespesaSubcategoria._id } });
+            await DespesaCategoria.findByIdAndUpdate(value.categoria, { $push: { receitaSubcategorias: novaDespesaSubcategoria._id } });
 
             res.status(201).json(novaDespesaSubcategoria);
         } catch (e: any) {
@@ -76,7 +76,7 @@ class DespesaSubcategoriaController {
             await DespesaSubcategoria.findByIdAndDelete(id);
 
             if (despesaSubcategoria.categoria) {
-                await DespesaCategoria.findByIdAndUpdate(despesaSubcategoria.categoria._id, { $pull: { despesaSubcategorias: id } });
+                await DespesaCategoria.findByIdAndUpdate(despesaSubcategoria.categoria._id, { $pull: { receitaSubcategorias: id } });
             }
 
             res.status(200).json({ message: `Subcategoria de despesa excluída com sucesso e vínculo removido com a categoria ${nomeCategoria}` });
