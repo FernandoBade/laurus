@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
+import { moedasLista } from '../utils/commons';
 import Usuario from '../models/usuario';
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
+
 
 const usuarioSchema = Joi.object({
     nome: Joi.string().required(),
@@ -9,7 +11,10 @@ const usuarioSchema = Joi.object({
     email: Joi.string().email().required(),
     senha: Joi.string().required(),
     dataNascimento: Joi.date().iso().required(),
-    telefone: Joi.string().optional()
+    telefone: Joi.string().optional(),
+    idioma: Joi.string().valid('en-US', 'pt-BR', 'es-ES').required(),
+    moeda: Joi.string().valid(...moedasLista).required(),
+    formatoData: Joi.string().valid('DD/MM/YYYY', 'MM/DD/YYYY').required(),
 });
 
 const usuarioUpdateSchema = Joi.object({
@@ -18,8 +23,11 @@ const usuarioUpdateSchema = Joi.object({
     email: Joi.string().email().optional(),
     senha: Joi.string().optional(),
     dataNascimento: Joi.date().iso().optional(),
-    telefone: Joi.string().optional()
-}).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone');
+    telefone: Joi.string().optional(),
+    idioma: Joi.string().valid('en-US', 'pt-BR', 'es-ES').optional(),
+    moeda: Joi.string().valid(...moedasLista).required().optional(),
+    formatoData: Joi.string().valid('DD/MM/YYYY', 'MM/DD/YYYY').optional(),
+}).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone', 'idioma', 'moeda', 'formatoData');
 
 class UsuarioController {
     static async cadastrarUsuario(req: Request, res: Response) {
@@ -29,14 +37,14 @@ class UsuarioController {
         }
 
         try {
-            const { nome, sobrenome, email, senha, dataNascimento, telefone } = value;
+            const { nome, sobrenome, email, senha, dataNascimento, telefone, idioma, moeda, formatoData } = value;
 
             const usuarioExistente = await Usuario.findOne({ email });
             if (usuarioExistente) {
                 return res.status(400).json({ mensagem: 'E-mail já cadastrado.' });
             }
 
-            const novoUsuario = new Usuario({ nome, sobrenome, email, senha, dataNascimento, telefone });
+            const novoUsuario = new Usuario({ nome, sobrenome, email, senha, dataNascimento, telefone, idioma, moeda, formatoData });
             await novoUsuario.save();
 
             res.status(201).json({ mensagem: 'Usuário registrado com sucesso.' });
@@ -44,6 +52,7 @@ class UsuarioController {
             res.status(500).json({ mensagem: 'Erro ao registrar usuário.', erro: error });
         }
     }
+
 
     static async listarUsuarios(req: Request, res: Response) {
         try {
@@ -85,7 +94,7 @@ class UsuarioController {
         try {
             const regex = new RegExp(req.params.email, 'i');
             const usuarios = await Usuario.find({ email: regex })
-                        .sort({ email: 1 });
+                .sort({ email: 1 });
             if (!usuarios.length) {
                 return res.status(404).json({ mensagem: 'Usuários não encontrados.' });
             }
@@ -116,7 +125,6 @@ class UsuarioController {
             res.status(500).json({ mensagem: 'Erro ao atualizar usuário.', erro: error });
         }
     }
-
 
     static async excluirUsuario(req: Request, res: Response) {
         const { id } = req.params;
