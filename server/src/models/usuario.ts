@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { moedasLista } from '../utils/commons';
+import { moedasLista } from '../utils/assets/moedasLista';
 
 const usuarioSchema = new mongoose.Schema({
     nome: { type: String, required: true },

@@ -1,31 +1,23 @@
-//#region importacoes
+//#region _importacoes
 import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import Globalize from 'globalize';
 import cldrData from 'cldr-data';
-//#endregion importacoes    
-
-//#region _assets
-// Lista de moedas permitidas atualmente
-export const moedasLista: string[] = [
-    "ARS",
-    "BRL",
-    "CLP",
-    "COP",
-    "EUR",
-    "GBP",
-    "JPY",
-    "MXN",
-    "USD",
-    "UYU"
-];
-//#endregion _assets
+import resources from './assets/resources';
+//#endregion _importacoes
 
 //#region _globalize
+Globalize.locale('pt');
+
 // Carrega os dados necessários do CLDR para o Globalize
 Globalize.load(cldrData.entireSupplemental());
 Globalize.load(cldrData.entireMainFor('en', 'pt', 'es'));
+
+// Função para carregar mensagens traduzidas para o Globalize
+function carregarMensagens(idioma: string) {
+    Globalize.loadMessages(resources[idioma]);
+}
 
 /**
  * Configura o idioma atual para o Globalize.
@@ -33,6 +25,7 @@ Globalize.load(cldrData.entireMainFor('en', 'pt', 'es'));
  * @param {string} idioma - O código do idioma a ser configurado.
  */
 export function configurarIdioma(idioma: string): void {
+    carregarMensagens(idioma); // Certifique-se de carregar as mensagens para o idioma escolhido
     Globalize.locale(idioma);
 }
 
@@ -80,6 +73,7 @@ export function formatarData(data: Date, opcoes?: Globalize.DateFormatterOptions
     return Globalize.formatDate(data, opcoes);
 }
 //#endregion _globalize
+
 
 //#region _logger
 
@@ -200,7 +194,7 @@ export function logNotice(message: string) {
 
 //#endregion _logger
 
-//#region _commons
+//#region _gerais/tratamentos
 /**
  * Seleciona um número aleatório de tags de uma lista fornecida.
  *
@@ -252,4 +246,4 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 
     return dataAtual;
 }
-//#endregion _commons
+//#endregion _gerais/tratamentos

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { moedasLista } from '../utils/commons';
+import { moedasLista } from '../utils/assets/moedasLista';
+import  resources  from '../utils/assets/resources';
 import Usuario from '../models/usuario';
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
