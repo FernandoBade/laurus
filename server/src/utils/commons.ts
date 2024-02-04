@@ -2,77 +2,57 @@
 import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
-import Globalize from 'globalize';
-import cldrData from 'cldr-data';
-import resources from './assets/resources';
+import i18n from '../utils/assets/resources';
+
 //#endregion _importacoes
 
-//#region _globalize
-Globalize.locale('pt');
-
-// Carrega os dados necessários do CLDR para o Globalize
-Globalize.load(cldrData.entireSupplemental());
-Globalize.load(cldrData.entireMainFor('en', 'pt', 'es'));
-
-// Função para carregar mensagens traduzidas para o Globalize
-function carregarMensagens(idioma: string) {
-    Globalize.loadMessages(resources[idioma]);
-}
-
+//#region _i18next
 /**
- * Configura o idioma atual para o Globalize.
- *
- * @param {string} idioma - O código do idioma a ser configurado.
- */
-export function configurarIdioma(idioma: string): void {
-    carregarMensagens(idioma); // Certifique-se de carregar as mensagens para o idioma escolhido
-    Globalize.locale(idioma);
-}
-
-/**
- * Traduz uma chave para o idioma configurado, com suporte a parâmetros dinâmicos.
+ * Traduz uma chave para o idioma atualmente configurado, com suporte a parâmetros dinâmicos.
  *
  * @param {string} chave - A chave da mensagem a ser traduzida.
  * @param {Object} [parametros] - Os parâmetros opcionais para a mensagem traduzida.
  * @returns {string} A mensagem traduzida.
  */
-export function traduzir(chave: string, parametros?: Object): string {
-    return Globalize.formatMessage(chave, parametros);
+export function resource(chave: string, parametros?: Record<string, any>): string {
+    return i18n.t(chave, parametros);
+}
+
+
+/**
+ * Altera o idioma atualmente configurado no i18next.
+ *
+ * @param {string} idioma - O código do idioma para o qual mudar.
+ */
+export function alterarIdioma(idioma: string): void {
+    i18n.changeLanguage(idioma);
 }
 
 /**
- * Formata um número de acordo com o idioma configurado e opções fornecidas.
+ * Formata um número de acordo com o idioma e as configurações de localização atualmente configurados.
  *
  * @param {number} numero - O número a ser formatado.
- * @param {Globalize.NumberFormatterOptions} [opcoes] - As opções de formatação.
+ * @param {Object} [opcoes] - As opções de formatação.
  * @returns {string} O número formatado.
  */
-export function formatarNumero(numero: number, opcoes?: Globalize.NumberFormatterOptions): string {
-    return Globalize.formatNumber(numero, opcoes);
+export function formatarNumero(numero: number, opcoes?: Object): string {
+    return i18n.t('formatNumber', { val: numero, format: opcoes });
+    // Nota: Você precisa configurar um custom formatter ou adicionar essa chave no seu resource com uma função de formatação adequada.
 }
 
 /**
- * Formata um valor monetário de acordo com o idioma e a moeda configurados.
- *
- * @param {number} valor - O valor monetário a ser formatado.
- * @param {string} moeda - O código da moeda a ser utilizada na formatação.
- * @returns {string} O valor monetário formatado.
- */
-export function formatarMoeda(valor: number, moeda: string): string {
-    return Globalize.formatCurrency(valor, moeda);
-}
-
-/**
- * Formata uma data de acordo com o idioma configurado e opções fornecidas.
+ * Formata uma data de acordo com o idioma e as configurações de localização atualmente configurados.
  *
  * @param {Date} data - A data a ser formatada.
- * @param {Globalize.DateFormatterOptions} [opcoes] - As opções de formatação.
+ * @param {Object} [opcoes] - As opções de formatação.
  * @returns {string} A data formatada.
  */
-export function formatarData(data: Date, opcoes?: Globalize.DateFormatterOptions): string {
-    return Globalize.formatDate(data, opcoes);
+export function formatarData(data: Date, opcoes?: Object): string {
+    return i18n.t('formatDate', { val: data, format: opcoes });
+    // Nota: Assim como na formatação de número, você precisa de uma custom formatter ou adicionar essa chave no seu resource.
 }
-//#endregion _globalize
+
+//#endregion i18next
 
 
 //#region _logger
