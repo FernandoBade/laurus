@@ -8,52 +8,51 @@ import i18n from '../utils/assets/resources';
 
 //#region _i18next
 /**
- * Traduz uma chave para o idioma atualmente configurado, com suporte a parâmetros dinâmicos.
- *
- * @param {string} chave - A chave da mensagem a ser traduzida.
- * @param {Object} [parametros] - Os parâmetros opcionais para a mensagem traduzida.
- * @returns {string} A mensagem traduzida.
- */
+* Traduz uma chave para o idioma atualmente configurado, com suporte a parâmetros dinâmicos.
+*
+* @param {string} chave - A chave da mensagem a ser traduzida.
+* @param {Object} [parametros] - Os parâmetros opcionais para a mensagem traduzida.
+* @returns {string} A mensagem traduzida.
+*/
 export function resource(chave: string, parametros?: Record<string, any>): string {
     return i18n.t(chave, parametros);
 }
 
 
 /**
- * Altera o idioma atualmente configurado no i18next.
- *
- * @param {string} idioma - O código do idioma para o qual mudar.
- */
+* Altera o idioma atualmente configurado no i18next.
+*
+* @param {string} idioma - O código do idioma para o qual mudar.
+*/
 export function alterarIdioma(idioma: string): void {
     i18n.changeLanguage(idioma);
 }
 
 /**
- * Formata um número de acordo com o idioma e as configurações de localização atualmente configurados.
- *
- * @param {number} numero - O número a ser formatado.
- * @param {Object} [opcoes] - As opções de formatação.
- * @returns {string} O número formatado.
- */
+* Formata um número de acordo com o idioma e as configurações de localização atualmente configurados.
+*
+* @param {number} numero - O número a ser formatado.
+* @param {Object} [opcoes] - As opções de formatação.
+* @returns {string} O número formatado.
+*/
 export function formatarNumero(numero: number, opcoes?: Object): string {
     return i18n.t('formatNumber', { val: numero, format: opcoes });
     // Nota: Você precisa configurar um custom formatter ou adicionar essa chave no seu resource com uma função de formatação adequada.
 }
 
 /**
- * Formata uma data de acordo com o idioma e as configurações de localização atualmente configurados.
- *
- * @param {Date} data - A data a ser formatada.
- * @param {Object} [opcoes] - As opções de formatação.
- * @returns {string} A data formatada.
- */
+* Formata uma data de acordo com o idioma e as configurações de localização atualmente configurados.
+*
+* @param {Date} data - A data a ser formatada.
+* @param {Object} [opcoes] - As opções de formatação.
+* @returns {string} A data formatada.
+*/
 export function formatarData(data: Date, opcoes?: Object): string {
     return i18n.t('formatDate', { val: data, format: opcoes });
     // Nota: Assim como na formatação de número, você precisa de uma custom formatter ou adicionar essa chave no seu resource.
 }
 
-//#endregion i18next
-
+//#endregion _i18next
 
 //#region _logger
 

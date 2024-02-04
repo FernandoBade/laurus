@@ -21,9 +21,8 @@
  * multilíngues em nosso aplicativo.
  */
 
-// i18nConfig.ts
+
 import i18n from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 const resources = {
     "pt-BR": {
@@ -32,8 +31,8 @@ const resources = {
             "senhaIncorreta": "Senha incorreta",
             "erroAoFazerLogin": "Erro ao fazer login",
             "erroInternoNoServidor": "Erro interno no servidor",
-            "logoutSucesso": "Logout realizado com sucesso, {{usuario.apelido}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
-            "loginSucesso": "Login realizado com sucesso. Bem-vindo(a), {{apelido}}!"
+            "logoutSucesso": "Login realizado com sucesso, {{usuario.apelido}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
+            "loginSucesso": "Login realizado com sucesso, {{usuario.apelido}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
         }
     },
     "en-US": {
@@ -59,7 +58,6 @@ const resources = {
 };
 
 i18n
-    .use(LanguageDetector) // Utiliza o LanguageDetector para determinar o idioma do usuário
     .init({
         resources,
         fallbackLng: "pt-BR", // Idioma de fallback caso o idioma do usuário não esteja disponível

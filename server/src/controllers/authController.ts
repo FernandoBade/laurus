@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { traduzir, logError, logInfo } from '../utils/commons';
+import { resource, logError, logInfo } from '../utils/commons';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
@@ -19,25 +19,24 @@ class AuthController {
         try {
             const { email, senha } = req.body;
             const usuario = await Usuario.findOne({ email });
-            const idioma = usuario ? usuario.idioma : 'pt-BR'; // Define o idioma padrão caso não encontre o usuário
 
             if (!usuario) {
-                logInfo(traduzir('usuarioNaoEncontrado', idioma));
-                return res.status(401).json({ error: traduzir('usuarioNaoEncontrado', idioma) });
+                logInfo(resource('usuarioNaoEncontrado'));
+                return res.status(401).json({ error: resource('usuarioNaoEncontrado') });
             }
 
             const senhaValida = await bcrypt.compare(senha, usuario.senha);
             if (!senhaValida) {
-                logInfo(traduzir('senhaIncorreta', idioma));
-                return res.status(401).json({ error: traduzir('senhaIncorreta', idioma) });
+                logInfo(resource('senhaIncorreta'));
+                return res.status(401).json({ error: resource('senhaIncorreta') });
             }
 
             const token = jwt.sign({ userId: usuario._id }, jwtSecret || 'defaultSecret', { expiresIn: '2h' });
             res.cookie('token', token, { httpOnly: true });
-            res.json({ message: traduzir('loginSuccess', idioma) });
+            res.json({ message: resource('loginSucesso', { usuario: usuario }) });
         } catch (error) {
-            logError(traduzir('erroAoFazerLogin', 'pt-BR') + `: ${error}`);
-            res.status(500).json({ error: traduzir('erroInternoNoServidor', 'pt-BR') });
+            logError(resource('erroAoFazerLogin') + `: ${error}`);
+            res.status(500).json({ error: resource('erroInternoNoServidor') });
         }
     }
 
@@ -49,7 +48,7 @@ class AuthController {
      */
     static logout(req: Request, res: Response) {
         res.clearCookie('token');
-        res.json({ message: traduzir('logoutSucesso', 'pt-BR') });
+        res.json({ message: resource('logoutSucesso') });
     }
 }
 
