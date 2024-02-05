@@ -31,8 +31,8 @@ const resources = {
             "senhaIncorreta": "Senha incorreta",
             "erroAoFazerLogin": "Erro ao fazer login",
             "erroInternoNoServidor": "Erro interno no servidor",
-            "logoutSucesso": "Login realizado com sucesso, {{usuario.apelido}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
-            "loginSucesso": "Login realizado com sucesso, {{usuario.apelido}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
+            "logoutSucesso": "Login realizado com sucesso, {{usuario.nome}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
+            "loginSucesso": "Login realizado com sucesso, {{usuario.nome}}. Seu nome é {{usuario.nome}} e seu sobrenome é {{usuario.sobrenome}}!",
         }
     },
     "en-US": {
@@ -51,8 +51,8 @@ const resources = {
             "senhaIncorreta": "Contraseña incorrecta",
             "erroAoFazerLogin": "Error de inicio de sesión",
             "erroInternoNoServidor": "Error interno del servidor",
-            "logoutSucesso": "Cierre de sesión exitoso, {{usuario.apelido}}!",
-            "loginSucesso": "Login realizado con éxito. Bien venido(a), {{apelido}}!"
+            "logoutSucesso": "Cierre de sesión exitoso, {{usuario.nome}}!",
+            "loginSucesso": "Login realizado con éxito. Bien venido(a), {{usuario.nome}}!"
         }
     }
 };

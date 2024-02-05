@@ -9,46 +9,40 @@ dotenv.config();
 const jwtSecret = process.env.JWT_SECRET;
 
 class AuthController {
-    /**
-     * Efetua o login do usuário.
-     *
-     * @param req - O objeto de requisição HTTP contendo as informações do usuário.
-     * @param res - O objeto de resposta HTTP para enviar a resposta ao cliente.
-     */
     static async login(req: Request, res: Response) {
         try {
+            // Detectar o idioma a partir do cabeçalho 'Accept-Language' ou usar 'pt-BR' como padrão
+            console.log(req.headers)
+            console.log(req.headers['accept-language'])
+            const idiomaRequisicao = req.headers['accept-language']?.split(',')[0] || 'pt-BR';
+
             const { email, senha } = req.body;
             const usuario = await Usuario.findOne({ email });
-
+            console.log(usuario)
             if (!usuario) {
-                logInfo(resource('usuarioNaoEncontrado'));
-                return res.status(401).json({ error: resource('usuarioNaoEncontrado') });
+                logInfo(resource('usuarioNaoEncontrado', { lang: idiomaRequisicao }));
+                return res.status(401).json({ error: resource('usuarioNaoEncontrado', { lang: idiomaRequisicao }) });
             }
 
             const senhaValida = await bcrypt.compare(senha, usuario.senha);
             if (!senhaValida) {
-                logInfo(resource('senhaIncorreta'));
-                return res.status(401).json({ error: resource('senhaIncorreta') });
+                logInfo(resource('senhaIncorreta', { lang: usuario.idioma })); // Usar o idioma do usuário após autenticação
+                return res.status(401).json({ error: resource('senhaIncorreta', { lang: usuario.idioma }) });
             }
 
             const token = jwt.sign({ userId: usuario._id }, jwtSecret || 'defaultSecret', { expiresIn: '2h' });
             res.cookie('token', token, { httpOnly: true });
-            res.json({ message: resource('loginSucesso', { usuario: usuario }) });
+            // Responder com a mensagem de sucesso no idioma do usuário
+            res.json({ message: resource('loginSucesso', { lang: usuario.idioma, usuario: usuario }) });
         } catch (error) {
-            logError(resource('erroAoFazerLogin') + `: ${error}`);
-            res.status(500).json({ error: resource('erroInternoNoServidor') });
+            logError(resource('erroAoFazerLogin', { lang: 'pt-BR' }) + `: ${error}`); // Usar 'pt-BR' como idioma padrão para erros do servidor
+            res.status(500).json({ error: resource('erroInternoNoServidor', { lang: 'pt-BR' }) });
         }
     }
 
-    /**
-     * Efetua o logout do usuário, removendo o token de autenticação.
-     *
-     * @param req - O objeto de requisição HTTP contendo as informações do usuário.
-     * @param res - O objeto de resposta HTTP para enviar a resposta ao cliente.
-     */
     static logout(req: Request, res: Response) {
         res.clearCookie('token');
-        res.json({ message: resource('logoutSucesso') });
+        res.json({ message: resource('logoutSucesso', { lang: 'pt-BR' }) }); // Considerar 'pt-BR' como idioma padrão para logout
     }
 }
 
