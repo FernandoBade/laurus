@@ -39,23 +39,9 @@ export function formatarNumero(numero: number, opcoes?: Object): string {
     return i18n.t('formatNumber', { val: numero, format: opcoes });
     // Nota: Você precisa configurar um custom formatter ou adicionar essa chave no seu resource com uma função de formatação adequada.
 }
-
-/**
-* Formata uma data de acordo com o idioma e as configurações de localização atualmente configurados.
-*
-* @param {Date} data - A data a ser formatada.
-* @param {Object} [opcoes] - As opções de formatação.
-* @returns {string} A data formatada.
-*/
-export function formatarData(data: Date, opcoes?: Object): string {
-    return i18n.t('formatDate', { val: data, format: opcoes });
-    // Nota: Assim como na formatação de número, você precisa de uma custom formatter ou adicionar essa chave no seu resource.
-}
-
 //#endregion _i18next
 
 //#region _logger
-
 const logPath = path.join(__dirname, './logs/');
 
 const customLevels = {
@@ -172,6 +158,46 @@ export function logNotice(message: string) {
 }
 
 //#endregion _logger
+
+//#region _date-fns
+import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
+
+// Certifique-se de que esta função seja única no módulo e não tenha conflitos de nomeação
+export function formatarDataPadraoUsuario(data: string | Date, formato: string = 'dd/MM/yyyy'): string {
+    const dataObj = typeof data === 'string' ? parseISO(data) : data;
+    return formatDate(dataObj, formato);
+}
+
+// Analisa uma string de data no formato especificado para um objeto Date
+export function analisarData(dataString: string, formato: string = 'dd/MM/yyyy', referencia: Date = new Date()): Date {
+    return parse(dataString, formato, referencia);
+}
+
+// Verifica se duas datas são iguais
+export function datasSaoIguais(data1: Date, data2: Date): boolean {
+    return isEqual(data1, data2);
+}
+
+// Verifica se a primeira data é anterior à segunda
+export function dataEhAnterior(data1: Date, data2: Date): boolean {
+    return isBefore(data1, data2);
+}
+
+// Verifica se a primeira data é posterior à segunda
+export function dataEhPosterior(data1: Date, data2: Date): boolean {
+    return isAfter(data1, data2);
+}
+
+// Adiciona uma quantidade de dias a uma data
+export function adicionarDias(data: Date, quantidade: number): Date {
+    return addDays(data, quantidade);
+}
+
+// Subtrai uma quantidade de dias de uma data
+export function subtrairDias(data: Date, quantidade: number): Date {
+    return subDays(data, quantidade);
+}
+//#endregion _date-fns
 
 //#region _gerais/tratamentos
 /**

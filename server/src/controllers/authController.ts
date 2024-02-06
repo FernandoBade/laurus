@@ -32,7 +32,6 @@ class AuthController {
 
             const token = jwt.sign({ userId: usuario._id }, jwtSecret || 'defaultSecret', { expiresIn: '2h' });
             res.cookie('token', token, { httpOnly: true });
-            // Responder com a mensagem de sucesso no idioma do usuário
             res.json({ message: resource('loginSucesso', { lang: usuario.idioma, usuario: usuario }) });
         } catch (error) {
             logError(resource('erroAoFazerLogin', { lang: 'pt-BR' }) + `: ${error}`); // Usar 'pt-BR' como idioma padrão para erros do servidor
