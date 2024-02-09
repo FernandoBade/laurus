@@ -34,6 +34,16 @@
             "date": 1707193996744,
             "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\application-2024-02-06.log",
             "hash": "60c33734865fba643ce0f9a6f7ac80c39a7b61ad5f2411c095e05a36431c10f3"
+        },
+        {
+            "date": 1707444941342,
+            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\application-2024-02-08.log",
+            "hash": "57a7a617e564c8ef1cec963369bf7cbbfc645ad42d0db568a26a471e8a85e709"
+        },
+        {
+            "date": 1707451532673,
+            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\application-2024-02-09.log",
+            "hash": "641f9d53606259e7c1719cabb11063eba6d37b9ebf3738d18c16412fcb537a3e"
         }
     ],
     "hashType": "sha256"

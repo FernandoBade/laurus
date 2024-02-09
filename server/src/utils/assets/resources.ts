@@ -27,10 +27,10 @@ import i18n from 'i18next';
 const resources = {
     "pt-BR": {
         translation: {
-            "usuarioNaoEncontrado": "Usuário não encontrado",
-            "senhaIncorreta": "Senha incorreta",
-            "erroAoFazerLogin": "Erro ao fazer login",
-            "erroInternoNoServidor": "Erro interno no servidor",
+            "usuarioNaoEncontrado": "Usuário não encontrado.",
+            "senhaIncorreta": "Senha incorreta. Tente novamente, por favor.",
+            "erroAoFazerLogin": "Erro ao fazer login. Por favor, revise os dados e tente novamente.",
+            "erroInternoNoServidor": "Erro interno no servidor. Por favor, tente novamente dentro de alguns segundos ou entre em contato com o nosso suporte.",
             "logoutSucesso": "Login realizado com sucesso, {{usuario.nome}}.",
             "loginSucesso": "Login realizado com sucesso, {{usuario.nome}}.",
         }

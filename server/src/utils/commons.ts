@@ -3,6 +3,7 @@ import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import i18n from '../utils/assets/resources';
+import { Response as ExpressResponse } from 'express';
 
 //#endregion _importacoes
 
@@ -69,7 +70,7 @@ const customLevels = {
 
 addColors(customLevels.colors);
 
-const logger = createLogger({
+export const logger = createLogger({
     levels: customLevels.levels,
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
@@ -100,62 +101,6 @@ const logger = createLogger({
 });
 
 export default logger;
-
-/**
- * Registra uma mensagem de log no nível de emergência, indicando uma situação crítica onde o sistema está inutilizável.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logEmerg(message: string) {
-    logger.emerg(message);
-}
-
-/**
- * Registra uma mensagem de log no nível de alerta, sugerindo que uma ação imediata é necessária.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logAlert(message: string) {
-    logger.alert(message);
-}
-
-/**
- * Registra uma mensagem de log no nível crítico, indicando condições críticas que podem tornar o serviço indisponível.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logCrit(message: string) {
-    logger.crit(message);
-}
-
-/**
- * Registra uma mensagem de log no nível de erro, indicando condições de erro sob as quais uma função falhou.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logError(message: string) {
-    logger.error(message);
-}
-
-/**
- * Registra uma mensagem de log no nível de aviso, indicando condições potencialmente prejudiciais.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logWarning(message: string) {
-    logger.warning(message);
-}
-
-/**
- * Registra uma mensagem de log no nível informativo e de sucesso, fornecendo informações sobre o estado operacional do sistema.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logInfo(message: string) {
-    logger.info(message);
-}
-
-/**
- * Registra uma mensagem de log no nível de aviso, indicando uma condição normal, mas significativa, que deve ser observada.
- * @param {string} message - A mensagem de log a ser registrada.
- */
-export function logNotice(message: string) {
-    logger.notice(message);
-}
 
 //#endregion _logger
 
@@ -251,4 +196,35 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 
     return dataAtual;
 }
+
+/**
+ * Envia uma resposta internacionalizada ao cliente e registra um log correspondente.
+ * @param res O objeto de resposta do Express.
+ * @param status O código de status HTTP da resposta.
+ * @param logger Objeto logger para registrar os logs.
+ * @param chaveResource A chave do recurso para buscar a mensagem internacionalizada.
+ * @param dadosInterpolacao Dados para interpolação na mensagem internacionalizada.
+ */
+export function loggerResource(res: ExpressResponse, status: number, logger: any, chaveResource: string, dadosInterpolacao?: Record<string, any>) {
+    const idiomaRequisicao = dadosInterpolacao?.lang || 'pt-BR';
+    const mensagem = resource(chaveResource, { ...dadosInterpolacao, lang: idiomaRequisicao });
+
+    // Registra o log com base no status HTTP
+    if (status >= 500) {
+        logger.error(mensagem);
+    } else if (status >= 400) {
+        logger.warning(mensagem);
+    } else {
+        logger.info(mensagem);
+    }
+
+    // Envia a resposta com base no status HTTP
+    if (status >= 400) {
+        res.status(status).json({ error: mensagem });
+    } else {
+        res.status(status).json({ message: mensagem });
+    }
+}
+
+
 //#endregion _gerais/tratamentos
