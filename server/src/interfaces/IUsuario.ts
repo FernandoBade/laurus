@@ -1,18 +1,20 @@
-import { Document } from 'mongoose';
+import { Types } from 'mongoose';
 import { EnumIdiomas, EnumFormatoData, EnumMoedas } from '../utils/assets/enums';
 
-export interface IUsuario extends Document {
+export interface IUsuario {
+    [x: string]: any;
+    _id?: Types.ObjectId;
     nome: string;
     email: string;
     sobrenome: string;
-    telefone?: string;
+    telefone?: string | null;
     senha: string;
     dataNascimento: Date;
-    contas: string[];
-    cartoesDeCredito: string[];
-    despesaCategorias: string[];
-    receitaCategorias: string[];
-    tags: string[];
+    contas: Types.ObjectId[];
+    cartoesDeCredito: Types.ObjectId[];
+    despesaCategorias: Types.ObjectId[];
+    receitaCategorias: Types.ObjectId[];
+    tags: Types.ObjectId[];
     idioma: EnumIdiomas;
     moeda: EnumMoedas;
     formatoData: EnumFormatoData;

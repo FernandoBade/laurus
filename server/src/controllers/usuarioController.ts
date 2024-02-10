@@ -1,11 +1,10 @@
-import { Request, Response } from 'express';
-import { IUsuario } from '../interfaces/IUsuario';
 import { EnumMoedas, EnumIdiomas, EnumFormatoData } from '../utils/assets/enums';
-import  resources  from '../utils/assets/resources';
+import { IUsuario } from '../interfaces/IUsuario';
+import { responderAPI } from '../utils/commons';
+import { Request, Response } from 'express';
 import Usuario from '../models/usuario';
-import Joi from 'joi';
 import bcrypt from 'bcrypt';
-
+import Joi from 'joi';
 
 const usuarioSchema = Joi.object({
     nome: Joi.string().required(),
@@ -32,117 +31,145 @@ const usuarioUpdateSchema = Joi.object({
 }).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone', 'idioma', 'moeda', 'formatoData');
 
 class UsuarioController {
+    /**
+    * Cadastra um novo usuário no sistema.
+    * @param req Objeto da requisição, contendo os dados do novo usuário.
+    * @param res Objeto da resposta, utilizado para enviar o feedback da operação.
+    * Valida os dados do usuário utilizando um schema Joi e, se válido, verifica a existência do e-mail.
+    * Se o e-mail não estiver registrado, cria um novo usuário e o salva no banco de dados.
+    */
     static async cadastrarUsuario(req: Request, res: Response) {
         const { error, value } = usuarioSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details.map(detail => detail.message) });
+            return responderAPI(res, 400, 'erro.validacaoDadosUsuario', { detalhes: error.details.map((detalhe) => detalhe.message) });
         }
 
         try {
-            const { nome, sobrenome, email, senha, dataNascimento, telefone, idioma, moeda, formatoData } = value;
-
-            const usuarioExistente = await Usuario.findOne({ email });
+            const usuarioExistente = await Usuario.findOne({ email: value.email });
             if (usuarioExistente) {
-                return res.status(400).json({ mensagem: 'E-mail já cadastrado.' });
+                return responderAPI(res, 400, 'erro.emailJaCadastrado');
             }
 
-            const novoUsuario = new Usuario({ nome, sobrenome, email, senha, dataNascimento, telefone, idioma, moeda, formatoData });
-            await novoUsuario.save();
+            const novoUsuarioDocument = await new Usuario(value).save();
+            const novoUsuario = novoUsuarioDocument.toObject();
 
-            res.status(201).json({ mensagem: 'Usuário registrado com sucesso.' });
+            responderAPI(res, 201, 'sucesso.registroComSucesso', { usuario: novoUsuario });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao registrar usuário.', erro: error });
+            responderAPI(res, 500, 'erro.registrarUsuario', { erro: error });
         }
     }
 
-
+    /**
+    * Lista todos os usuários cadastrados no sistema.
+    * @param req Objeto da requisição.
+    * @param res Objeto da resposta, utilizado para enviar a lista de usuários.
+    * Recupera todos os usuários do banco de dados e os retorna em formato JSON.
+    */
     static async listarUsuarios(req: Request, res: Response) {
         try {
             const usuarios = await Usuario.find();
-            res.json(usuarios);
+            responderAPI(res, 200, 'sucesso.listaUsuarios', {}, usuarios);
         } catch (e) {
-            res.status(500).json({ error: 'Erro ao listar os usuários' });
+            responderAPI(res, 500, 'erro.listarUsuarios');
         }
     }
 
+
+    /**
+    * Obtém detalhes de um usuário específico pelo seu ID.
+    * @param req Objeto da requisição, contendo o ID do usuário como parâmetro de rota.
+    * @param res Objeto da resposta, utilizado para enviar os detalhes do usuário ou uma mensagem de erro.
+    * Busca um usuário pelo ID fornecido. Se encontrado, retorna os detalhes do usuário.
+    */
     static async obterUsuarioPorId(req: Request, res: Response) {
         try {
             const usuario = await Usuario.findById(req.params.id);
             if (!usuario) {
-                return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+                return responderAPI(res, 404, 'erro.usuarioNaoEncontrado');
             }
-            res.json(usuario);
+            responderAPI(res, 200, 'sucesso.usuarioEncontrado', { usuario });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao buscar usuário.', erro: error });
+            responderAPI(res, 500, 'erro.buscarUsuario');
         }
     }
 
+    /**
+    * Busca usuários por nome ou sobrenome.
+    * @param req Objeto da requisição, contendo o nome ou sobrenome como parâmetro de rota.
+    * @param res Objeto da resposta, utilizado para enviar a lista de usuários encontrados ou uma mensagem de erro.
+    * Utiliza uma expressão regular para encontrar usuários que correspondam ao nome ou sobrenome fornecido.
+    */
     static async obterUsuarioPorNome(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.nome, 'i');
-            const usuarios = await Usuario.find({
-                $or: [
-                    { nome: regex },
-                    { sobrenome: regex }
-                ]
-            }).sort({ nome: 1 });
-            res.json(usuarios);
+            const usuarios = await Usuario.find({ $or: [{ nome: regex }, { sobrenome: regex }] }).sort({ nome: 1 });
+            responderAPI(res, 200, 'sucesso.usuariosEncontrados', { usuarios });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao buscar usuários.', erro: error });
+            responderAPI(res, 500, 'erro.buscarUsuarios');
         }
     }
 
+    /**
+    * Busca usuários pelo endereço de e-mail.
+    * @param req Objeto da requisição, contendo o e-mail como parâmetro de rota.
+    * @param res Objeto da resposta, utilizado para enviar a lista de usuários encontrados ou uma mensagem de erro.
+    * Utiliza uma expressão regular para encontrar usuários que correspondam ao e-mail fornecido.
+    */
     static async obterUsuarioPorEmail(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.email, 'i');
-            const usuarios = await Usuario.find({ email: regex })
-                .sort({ email: 1 });
+            const usuarios = await Usuario.find({ email: regex }).sort({ email: 1 });
             if (!usuarios.length) {
-                return res.status(404).json({ mensagem: 'Usuários não encontrados.' });
+                return responderAPI(res, 404, 'erro.usuariosNaoEncontrados');
             }
-            res.json(usuarios);
+            responderAPI(res, 200, 'sucesso.usuariosEncontrados', { usuarios });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao buscar usuários.', erro: error });
+            responderAPI(res, 500, 'erro.buscarUsuarios');
         }
     }
 
+    /**
+    * Atualiza os dados de um usuário existente.
+    * @param req Objeto da requisição, contendo os dados atualizados do usuário e o ID como parâmetro de rota.
+    * @param res Objeto da resposta, utilizado para enviar a confirmação da atualização ou uma mensagem de erro.
+    * Valida os dados fornecidos e, se válidos, atualiza o usuário correspondente ao ID fornecido.
+    */
     static async atualizarUsuario(req: Request, res: Response) {
         const { error, value } = usuarioUpdateSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details.map(detail => detail.message) });
+            return responderAPI(res, 400, 'erro.validacaoDadosUsuario', { detalhes: error.details.map(detalhe => detalhe.message) });
         }
 
         try {
             if (value.senha) {
-                const saltRounds = 10;
-                value.senha = await bcrypt.hash(value.senha, saltRounds);
+                value.senha = await bcrypt.hash(value.senha, 10);
             }
 
             const atualizado = await Usuario.findByIdAndUpdate(req.params.id, value, { new: true });
             if (!atualizado) {
-                return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+                return responderAPI(res, 404, 'erro.usuarioNaoEncontrado');
             }
-            res.json({ mensagem: 'Usuário atualizado com sucesso.', usuario: atualizado });
+            responderAPI(res, 200, 'sucesso.usuarioAtualizado', { usuario: atualizado });
         } catch (error) {
-            res.status(500).json({ mensagem: 'Erro ao atualizar usuário.', erro: error });
+            responderAPI(res, 500, 'erro.atualizarUsuario');
         }
     }
 
+    /**
+    * Exclui um usuário do sistema pelo seu ID.
+    * @param req Objeto da requisição, contendo o ID do usuário como parâmetro de rota.
+    * @param res Objeto da resposta, utilizado para enviar a confirmação da exclusão ou uma mensagem de erro.
+    * Busca e exclui o usuário correspondente ao ID fornecido.
+    */
     static async excluirUsuario(req: Request, res: Response) {
-        const { id } = req.params;
         try {
             const deletado = await Usuario.findByIdAndDelete(req.params.id);
             if (!deletado) {
-                return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+                return responderAPI(res, 404, 'erro.usuarioNaoEncontrado');
             }
-            res.json({ mensagem: 'Usuário excluído com sucesso.' });
+            responderAPI(res, 200, 'sucesso.usuarioExcluido');
         } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao excluir usuário com o ID ${id}:`, error.message);
-                res.status(400 | 401).json({ error: 'Erro ao excluir usuario.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            responderAPI(res, 500, 'erro.excluirUsuario');
         }
     }
 }

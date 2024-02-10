@@ -3,7 +3,8 @@ import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import i18n from '../utils/assets/resources';
-import { Response as ExpressResponse } from 'express';
+import { Response } from 'express';
+import { IUsuario } from '../interfaces/IUsuario';
 
 //#endregion _importacoes
 
@@ -198,33 +199,32 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 }
 
 /**
- * Envia uma resposta internacionalizada ao cliente e registra um log correspondente.
- * @param res O objeto de resposta do Express.
- * @param status O código de status HTTP da resposta.
- * @param logger Objeto logger para registrar os logs.
- * @param chaveResource A chave do recurso para buscar a mensagem internacionalizada.
- * @param dadosInterpolacao Dados para interpolação na mensagem internacionalizada.
- */
-export function loggerResource(res: ExpressResponse, status: number, logger: any, chaveResource: string, dadosInterpolacao?: Record<string, any>) {
-    const idiomaRequisicao = dadosInterpolacao?.lang || 'pt-BR';
-    const mensagem = resource(chaveResource, { ...dadosInterpolacao, lang: idiomaRequisicao });
+* Responde a uma requisição API com uma mensagem internacionalizada.
+* @param res Objeto de resposta do Express.
+* @param status Código de status HTTP para a resposta.
+* @param chave Chave de internacionalização para a mensagem de resposta.
+* @param usuario Objeto do usuário para interpolação e idioma.
+* @param dados Opcionais dados adicionais para interpolação na mensagem.
+*/
 
-    // Registra o log com base no status HTTP
-    if (status >= 500) {
-        logger.error(mensagem);
-    } else if (status >= 400) {
-        logger.warning(mensagem);
-    } else {
-        logger.info(mensagem);
-    }
+export function responderAPI(
+    res: Response,
+    status: number,
+    chave: string,
+    dados: Record<string, any> = {},
+    payload: any = null  // Adicione um parâmetro adicional para dados de payload
+) {
+    const idioma = dados.idioma || 'pt-BR'; // Assume 'pt-BR' como padrão se o idioma não for especificado
+    const mensagem = i18n.t(chave, { lng: idioma, ...dados });
 
-    // Envia a resposta com base no status HTTP
-    if (status >= 400) {
-        res.status(status).json({ error: mensagem });
+    // Se houver payload, inclua-o na resposta junto com a mensagem internacionalizada
+    if (payload !== null) {
+        res.status(status).json({ mensagem, dados: payload });
     } else {
-        res.status(status).json({ message: mensagem });
+        res.status(status).json(status >= 400 ? { erro: mensagem } : { mensagem });
     }
 }
+
 
 
 //#endregion _gerais/tratamentos
