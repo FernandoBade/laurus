@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { moedasLista } from '../utils/assets/moedasLista';
+import { EnumMoedas, EnumFormatoData, EnumIdiomas } from '../utils/assets/enums';
 
 const usuarioSchema = new mongoose.Schema({
     nome: { type: String, required: true },
@@ -14,9 +14,9 @@ const usuarioSchema = new mongoose.Schema({
     despesaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCategoria' }],
     receitaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCategoria' }],
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
-    idioma: { type: String, required: true, enum: ['en-US', 'pt-BR', 'es-ES'], default: 'pt-BR' },
-    moeda: { type: String, required: true, enum: moedasLista, default: 'BRL' },
-    formatoData: { type: String, required: true, enum: ['DD/MM/YYYY', 'MM/DD/YYYY'], default: 'DD/MM/YYYY' }
+    idioma: { type: String, required: true, enum: Object.values(EnumIdiomas), default: EnumIdiomas.PT_BR },
+    moeda: { type: String, required: true, enum: Object.values(EnumMoedas), default: EnumMoedas.BRL },
+    formatoData: { type: String, required: true, enum: Object.values(EnumFormatoData), default: EnumFormatoData.DD_MM_YYYY }
 });
 
 usuarioSchema.pre('save', async function (next) {

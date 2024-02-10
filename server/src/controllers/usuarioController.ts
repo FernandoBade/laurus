@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { moedasLista } from '../utils/assets/moedasLista';
+import { IUsuario } from '../interfaces/IUsuario';
+import { EnumMoedas, EnumIdiomas, EnumFormatoData } from '../utils/assets/enums';
 import  resources  from '../utils/assets/resources';
 import Usuario from '../models/usuario';
 import Joi from 'joi';
@@ -13,9 +14,9 @@ const usuarioSchema = Joi.object({
     senha: Joi.string().required(),
     dataNascimento: Joi.date().iso().required(),
     telefone: Joi.string().optional(),
-    idioma: Joi.string().valid('en-US', 'pt-BR', 'es-ES').required(),
-    moeda: Joi.string().valid(...moedasLista).required(),
-    formatoData: Joi.string().valid('DD/MM/YYYY', 'MM/DD/YYYY').required(),
+    idioma: Joi.string().valid(...Object.values(EnumIdiomas)).required(),
+    moeda: Joi.string().valid(...Object.values(EnumMoedas)).required(),
+    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).required()
 });
 
 const usuarioUpdateSchema = Joi.object({
@@ -25,9 +26,9 @@ const usuarioUpdateSchema = Joi.object({
     senha: Joi.string().optional(),
     dataNascimento: Joi.date().iso().optional(),
     telefone: Joi.string().optional(),
-    idioma: Joi.string().valid('en-US', 'pt-BR', 'es-ES').optional(),
-    moeda: Joi.string().valid(...moedasLista).required().optional(),
-    formatoData: Joi.string().valid('DD/MM/YYYY', 'MM/DD/YYYY').optional(),
+    idioma: Joi.string().valid(...Object.values(EnumIdiomas)).optional(),
+    moeda: Joi.string().valid(...Object.values(EnumMoedas)).optional(),
+    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).optional()
 }).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone', 'idioma', 'moeda', 'formatoData');
 
 class UsuarioController {
