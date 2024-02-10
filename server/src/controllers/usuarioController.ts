@@ -87,7 +87,7 @@ class UsuarioController {
             if (!usuario) {
                 return responderAPI(res, 404, 'erro.usuarioNaoEncontrado');
             }
-            responderAPI(res, 200, 'sucesso.usuarioEncontrado', { usuario });
+            responderAPI(res, 200, 'sucesso.usuarioEncontrado', {}, usuario);
         } catch (error) {
             responderAPI(res, 500, 'erro.buscarUsuario');
         }
@@ -103,7 +103,7 @@ class UsuarioController {
         try {
             const regex = new RegExp(req.params.nome, 'i');
             const usuarios = await Usuario.find({ $or: [{ nome: regex }, { sobrenome: regex }] }).sort({ nome: 1 });
-            responderAPI(res, 200, 'sucesso.usuariosEncontrados', { usuarios });
+            responderAPI(res, 200, 'sucesso.usuariosEncontrados', {}, usuarios);
         } catch (error) {
             responderAPI(res, 500, 'erro.buscarUsuarios');
         }
@@ -122,7 +122,7 @@ class UsuarioController {
             if (!usuarios.length) {
                 return responderAPI(res, 404, 'erro.usuariosNaoEncontrados');
             }
-            responderAPI(res, 200, 'sucesso.usuariosEncontrados', { usuarios });
+            responderAPI(res, 200, 'sucesso.usuariosEncontrados', {}, usuarios);
         } catch (error) {
             responderAPI(res, 500, 'erro.buscarUsuarios');
         }
@@ -149,7 +149,7 @@ class UsuarioController {
             if (!atualizado) {
                 return responderAPI(res, 404, 'erro.usuarioNaoEncontrado');
             }
-            responderAPI(res, 200, 'sucesso.usuarioAtualizado', { usuario: atualizado });
+            responderAPI(res, 200, 'sucesso.usuarioAtualizado', {}, atualizado);
         } catch (error) {
             responderAPI(res, 500, 'erro.atualizarUsuario');
         }
