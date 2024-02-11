@@ -230,7 +230,7 @@ if (!jwtSecreto) {
 }
 
 
-export const validarUsuario = (req: Request, res: Response, next: NextFunction) => {
+export const validarToken = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
@@ -239,14 +239,14 @@ export const validarUsuario = (req: Request, res: Response, next: NextFunction) 
 
     jwt.verify(token, jwtSecreto, (erro: VerifyErrors | null, decoded: any) => {
         if (erro) {
-            return responderAPI(res, 401, 'erro.tokenInvalido');
+            return responderAPI(res, 401, 'erro.sessaoExpirada');
         }
 
         if (decoded && typeof decoded === 'object' && 'id' in decoded) {
             (req as any).usuarioId = decoded.id;
             next();
         } else {
-            return responderAPI(res, 401, 'erro.tokenInvalido');
+            return responderAPI(res, 401, 'erro.sessaoExpirada');
         }
 
     });

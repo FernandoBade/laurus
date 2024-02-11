@@ -1,6 +1,6 @@
 import { EnumMoedas, EnumIdiomas, EnumFormatoData } from '../utils/assets/enums';
 import { IUsuario } from '../interfaces/IUsuario';
-import { responderAPI } from '../utils/commons';
+import logger, { resource, responderAPI } from '../utils/commons';
 import { Request, Response } from 'express';
 import Usuario from '../models/usuario';
 import bcrypt from 'bcrypt';
@@ -53,8 +53,10 @@ class UsuarioController {
             const novoUsuarioDocument = await new Usuario(valor).save();
             const novoUsuario = novoUsuarioDocument.toObject();
 
-            responderAPI(res, 201, 'sucesso.registroComSucesso', { usuario: novoUsuario });
-        } catch (erro) {
+            logger.info(resource('log.sucessoCadastroUsuario', { usuario: novoUsuario }));
+            responderAPI(res, 201, 'sucesso.registroNovoUsuario', { usuario: novoUsuario });
+        } catch (erro: any) {
+            logger.error(resource('log.erroCadastroUsuario'), erro.toString());
             responderAPI(res, 500, 'erro.registrarUsuario', {}, erro);
         }
     }
@@ -68,8 +70,10 @@ class UsuarioController {
     static async listarUsuarios(req: Request, res: Response) {
         try {
             const usuarios = await Usuario.find();
-            responderAPI(res, 200, 'sucesso.listaUsuarios', {}, usuarios);
-        } catch (erro) {
+
+            responderAPI(res, 200, 'sucesso.listaUsuarios', { quantidade: usuarios.length }, usuarios);
+        } catch (erro: any) {
+            logger.error(resource('log.erroListarUsuarios'), erro.toString());
             responderAPI(res, 500, 'erro.listarUsuarios', {}, erro);
         }
     }
@@ -87,8 +91,10 @@ class UsuarioController {
             if (!usuario) {
                 return responderAPI(res, 404, 'erro.encontrarUsuario');
             }
+
             responderAPI(res, 200, 'sucesso.encontrarUsuario', {}, usuario);
-        } catch (erro) {
+        } catch (erro: any) {
+            logger.error(resource('erro.buscarUsuario'), erro.toString());
             responderAPI(res, 500, 'erro.buscarUsuario', {}, erro);
         }
     }
@@ -106,9 +112,11 @@ class UsuarioController {
             if (!usuarios.length) {
                 return responderAPI(res, 404, 'erro.encontrarUsuario');
             }
-            responderAPI(res, 200, 'sucesso.encontrarUsuario', {}, usuarios);
-        } catch (erro) {
-            responderAPI(res, 500, 'erro.buscarUsuarios', {}, erro);
+
+            responderAPI(res, 200, 'sucesso.listaUsuarios', { quantidade: usuarios.length }, usuarios);
+        } catch (erro: any) {
+            logger.error(resource('erro.listarUsuarios'), erro.toString());
+            responderAPI(res, 500, 'erro.listarUsuarios', {}, erro);
         }
     }
 
@@ -126,8 +134,9 @@ class UsuarioController {
                 return responderAPI(res, 404, 'erro.encontrarUsuario');
             }
             responderAPI(res, 200, 'sucesso.encontrarUsuario', {}, usuarios);
-        } catch (erro) {
-            responderAPI(res, 500, 'erro.buscarUsuarios', {}, erro);
+        } catch (erro: any) {
+            logger.error(resource('erro.buscarUsuario'), erro.toString());
+            responderAPI(res, 500, 'erro.buscarUsuario', {}, erro);
         }
     }
 
@@ -152,8 +161,16 @@ class UsuarioController {
             if (!usuarioParaAtualizar) {
                 return responderAPI(res, 404, 'erro.encontrarUsuario');
             }
+
+            const dadosLog = { ...value };
+            if (dadosLog.senha) {
+                dadosLog.senha = '[PROTEGIDO]';
+            }
+
+            logger.info(resource('log.sucessoAtualizarUsuario', { usuarioId: req.params.id, alteracoes: JSON.stringify(dadosLog) }));
             responderAPI(res, 200, 'sucesso.atualizarUsuario', { usuario: usuarioParaAtualizar }, usuarioParaAtualizar);
-        } catch (erro) {
+        } catch (erro: any) {
+            logger.error(resource('erro.erroAtualizarUsuario', { usuarioId: req.params.id }), erro.toString());
             responderAPI(res, 500, 'erro.atualizarUsuario', {}, erro);
         }
     }
@@ -170,8 +187,10 @@ class UsuarioController {
             if (!usuarioDeletado) {
                 return responderAPI(res, 404, 'erro.encontrarUsuario');
             }
+            logger.info(resource('log.sucessoExcluirUsuario', { usuario: usuarioDeletado }));
             responderAPI(res, 200, 'sucesso.excluirUsuario', { usuario: usuarioDeletado });
-        } catch (erro) {
+        } catch (erro: any) {
+            logger.error(resource('log.erroExcluirUsuario', { usuarioId: req.params.id }), erro.toString());
             responderAPI(res, 500, 'erro.excluirUsuario', {}, erro);
         }
     }

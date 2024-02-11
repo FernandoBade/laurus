@@ -9,6 +9,7 @@ const usuarioSchema = new mongoose.Schema({
   telefone: { type: String },
   senha: { type: String, required: true },
   dataNascimento: { type: Date, required: true },
+  tokenAtivo: { type: String},
   contas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Conta' }],
   cartoesDeCredito: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartaoCredito' }],
   despesaCategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCategoria' }],
@@ -17,7 +18,6 @@ const usuarioSchema = new mongoose.Schema({
   idioma: { type: String, required: true, enum: EnumIdiomas, default: EnumIdiomas.PT_BR },
   moeda: { type: String, required: true, enum: EnumMoedas, default: EnumMoedas.BRL },
   formatoData: { type: String, required: true, enum: EnumFormatoData, default: EnumFormatoData.DD_MM_YYYY }
-
 });
 
 usuarioSchema.pre('save', async function(next) {

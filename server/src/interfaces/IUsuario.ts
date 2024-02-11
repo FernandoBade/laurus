@@ -3,7 +3,6 @@ import { EnumIdiomas, EnumFormatoData, EnumMoedas } from '../utils/assets/enums'
 
 export interface IUsuario {
     [x: string]: any;
-    _id?: Types.ObjectId;
     nome: string;
     email: string;
     sobrenome: string;

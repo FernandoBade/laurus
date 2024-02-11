@@ -4,6 +4,7 @@ import AuthController from '../controllers/authController';
 const routes = express.Router();
 
 routes.post('/', AuthController.login);
-routes.get('/logout', AuthController.logout);
+routes.post('/logout', AuthController.logout);
+routes.post('/renovarToken', AuthController.renovarToken);
 
 export default routes;
