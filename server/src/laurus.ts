@@ -13,12 +13,13 @@ import receitaCategoriaRoutes from './routes/receitaCategoriaRoutes';
 import receitaSubcategoriaRoutes from './routes/receitaSubcategoriaRoutes';
 import receitaContaRoutes from './routes/receitaContaRoutes';
 import receitaCartaoCreditoRoutes from './routes/receitaCartaoCreditoRoutes';
+import { resource } from './utils/commons';
 
 require('dotenv').config();
 
 const uri = process.env.URI;
 if (!uri) {
-    throw new Error('A variável de ambiente URI não está definida.');
+    throw new Error(resource('erro.variavelAmbiente'));
 }
 
 mongoose.connect(uri);
@@ -28,18 +29,18 @@ const app = express();
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-app.use('/api/usuario', usuarioRoutes);
-app.use('/api/conta', contaRoutes);
 app.use('/api/cartaoCredito', cartaoCreditoRoutes);
-app.use('/api/despesaConta', despesaContaRoutes);
+app.use('/api/conta', contaRoutes);
 app.use('/api/despesaCartaoCredito', despesaCartaoCreditoRoutes);
 app.use('/api/despesaCategoria', despesaCategoriaRoutes);
+app.use('/api/despesaConta', despesaContaRoutes);
 app.use('/api/despesaSubcategoria', despesaSubcategoriaRoutes);
-app.use('/api/receitaConta', receitaContaRoutes);
 app.use('/api/receitaCartaoCredito', receitaCartaoCreditoRoutes);
 app.use('/api/receitaCategoria', receitaCategoriaRoutes);
+app.use('/api/receitaConta', receitaContaRoutes);
 app.use('/api/receitaSubcategoria', receitaSubcategoriaRoutes);
 app.use('/api/tag', tagRoutes);
+app.use('/api/usuario', usuarioRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

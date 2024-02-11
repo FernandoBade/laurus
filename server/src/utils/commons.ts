@@ -3,9 +3,10 @@ import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import i18n from '../utils/assets/resources';
-import { Response } from 'express';
-import { IUsuario } from '../interfaces/IUsuario';
+import { Request, Response, NextFunction } from 'express';
+import jwt, { VerifyErrors } from 'jsonwebtoken';
 
+require('dotenv').config();
 //#endregion _importacoes
 
 //#region _i18next
@@ -147,12 +148,12 @@ export function subtrairDias(data: Date, quantidade: number): Date {
 
 //#region _gerais/tratamentos
 /**
- * Seleciona um número aleatório de tags de uma lista fornecida.
- *
- * @param {string[] | any[]} tags - A lista de tags.
- * @param {number} maxTags - O número máximo de tags a serem selecionadas.
- * @returns {string[] | any[]} Um subconjunto aleatório das tags fornecidas.
- */
+* Seleciona um número aleatório de tags de uma lista fornecida.
+*
+* @param {string[] | any[]} tags - A lista de tags.
+* @param {number} maxTags - O número máximo de tags a serem selecionadas.
+* @returns {string[] | any[]} Um subconjunto aleatório das tags fornecidas.
+*/
 export function selecionarTagsAleatorias(tags: string | any[], maxTags: number) {
     const numeroDeTags = Math.floor(Math.random() * (maxTags + 1));
     const tagsSelecionadas: string | any[] = [];
@@ -168,23 +169,23 @@ export function selecionarTagsAleatorias(tags: string | any[], maxTags: number) 
 }
 
 /**
- * Gera um número aleatório dentro de um intervalo especificado.
- *
- * @param {number} min - O valor mínimo do intervalo.
- * @param {number} max - O valor máximo do intervalo.
- * @returns {number} Um número aleatório dentro do intervalo especificado.
- */
+* Gera um número aleatório dentro de um intervalo especificado.
+*
+* @param {number} min - O valor mínimo do intervalo.
+* @param {number} max - O valor máximo do intervalo.
+* @returns {number} Um número aleatório dentro do intervalo especificado.
+*/
 export function gerarNumeroAleatorio(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
- * Gera uma data aleatória, podendo ser no passado ou no futuro, a partir da data atual.
- *
- * @param {number} dias - O número de dias a partir de hoje para gerar a data.
- * @param {number | boolean} passadoOuFuturo - Indica se a data deve ser no passado (-1) ou no futuro (1).
- * @returns {Date} A data aleatória gerada.
- */
+* Gera uma data aleatória, podendo ser no passado ou no futuro, a partir da data atual.
+*
+* @param {number} dias - O número de dias a partir de hoje para gerar a data.
+* @param {number | boolean} passadoOuFuturo - Indica se a data deve ser no passado (-1) ou no futuro (1).
+* @returns {Date} A data aleatória gerada.
+*/
 export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boolean) {
     const dataAtual = new Date();
     const diasAleatorios = Math.floor(Math.random() * dias);
@@ -206,18 +207,16 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 * @param usuario Objeto do usuário para interpolação e idioma.
 * @param dados Opcionais dados adicionais para interpolação na mensagem.
 */
-
 export function responderAPI(
     res: Response,
     status: number,
     chave: string,
     dados: Record<string, any> = {},
-    payload: any = null  // Adicione um parâmetro adicional para dados de payload
+    payload: any = null
 ) {
-    const idioma = dados.idioma || 'pt-BR'; // Assume 'pt-BR' como padrão se o idioma não for especificado
+    const idioma = dados.idioma || 'pt-BR';
     const mensagem = i18n.t(chave, { lng: idioma, ...dados });
 
-    // Se houver payload, inclua-o na resposta junto com a mensagem internacionalizada
     if (payload !== null) {
         res.status(status).json({ mensagem, dados: payload });
     } else {
@@ -225,6 +224,32 @@ export function responderAPI(
     }
 }
 
+const jwtSecreto = process.env.JWT_SECRETO;
+if (!jwtSecreto) {
+    throw new Error(resource('erro.variavelAmbiente'));
+}
 
+
+export const validarUsuario = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+
+    if (!token) {
+        return responderAPI(res, 401, 'erro.tokenNaoFornecido');
+    }
+
+    jwt.verify(token, jwtSecreto, (erro: VerifyErrors | null, decoded: any) => {
+        if (erro) {
+            return responderAPI(res, 401, 'erro.tokenInvalido');
+        }
+
+        if (decoded && typeof decoded === 'object' && 'id' in decoded) {
+            (req as any).usuarioId = decoded.id;
+            next();
+        } else {
+            return responderAPI(res, 401, 'erro.tokenInvalido');
+        }
+
+    });
+};
 
 //#endregion _gerais/tratamentos
