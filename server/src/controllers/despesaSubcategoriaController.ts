@@ -6,12 +6,14 @@ import DespesaCategoria from '../models/despesaCategoria';
 const despesaSubcategoriaSchema = Joi.object({
     nome: Joi.string().required(),
     categoria: Joi.string().required(),
-    usuario: Joi.string().required()
+    usuario: Joi.string().required(),
+    ativo: Joi.boolean()
 });
 
 const despesaSubcategoriaUpdateSchema = Joi.object({
     nome: Joi.string().optional(),
     categoria: Joi.string().required(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class DespesaSubcategoriaController {

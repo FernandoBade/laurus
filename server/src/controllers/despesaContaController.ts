@@ -12,6 +12,7 @@ const despesaContaSchema = Joi.object({
     despesaSubcategoria: Joi.string().allow(null).optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 });
 
 const despesaContaUpdateSchema = Joi.object({
@@ -22,6 +23,7 @@ const despesaContaUpdateSchema = Joi.object({
     despesaSubcategoria: Joi.string().allow(null).optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class DespesaContaController {

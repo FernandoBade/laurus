@@ -7,7 +7,10 @@ const receitaContaSchema = new mongoose.Schema({
     receitaCategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCategoria', required: true },
     receitaSubcategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria', required: false },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
-    observacao: { type: String }
+    observacao: { type: String },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 const ReceitaConta = mongoose.model('ReceitaConta', receitaContaSchema, 'ReceitaConta');

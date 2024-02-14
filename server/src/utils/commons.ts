@@ -5,6 +5,7 @@ import path from 'path';
 import i18n from '../utils/assets/resources';
 import { Request, Response, NextFunction } from 'express';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
+import Usuario from '../controllers/usuarioController';
 
 require('dotenv').config();
 //#endregion _importacoes
@@ -108,6 +109,8 @@ export default logger;
 
 //#region _date-fns
 import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
+import mongoose, { Model } from 'mongoose';
+import usuario from '../models/usuario';
 
 // Certifique-se de que esta função seja única no módulo e não tenha conflitos de nomeação
 export function formatarDataPadraoUsuario(data: string | Date, formato: string = 'dd/MM/yyyy'): string {
@@ -224,32 +227,38 @@ export function responderAPI(
     }
 }
 
-const jwtSecreto = process.env.JWT_SECRETO;
-if (!jwtSecreto) {
-    throw new Error(resource('erro.variavelAmbiente'));
-}
-
 
 export const validarToken = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
-    if (!token) {
-        return responderAPI(res, 401, 'erro.tokenNaoFornecido');
+    const jwtSecreto = process.env.JWT_SECRETO;
+    if (!jwtSecreto) {
+        throw new Error(resource('erro.variavelAmbiente'));
     }
 
-    jwt.verify(token, jwtSecreto, (erro: VerifyErrors | null, decoded: any) => {
+    if (!token) {
+        return responderAPI(res, 401, 'erro_tokenNaoFornecido');
+    }
+
+    const UsuarioModel: Model<any> = mongoose.model('Usuario');
+
+    jwt.verify(token, jwtSecreto, async (erro: VerifyErrors | null, decoded: any) => {
         if (erro) {
-            return responderAPI(res, 401, 'erro.sessaoExpirada');
+            return responderAPI(res, 401, 'erro_sessaoExpirada', {}, erro.toString());
         }
 
         if (decoded && typeof decoded === 'object' && 'id' in decoded) {
-            (req as any).usuarioId = decoded.id;
+            const usuario = await UsuarioModel.findById(decoded.id);
+
+            const ultimoAcesso = usuario.ultimoAcesso ?? new Date(0);
+            if (new Date(decoded.iat * 1000) < ultimoAcesso) {
+                return responderAPI(res, 401, 'erro_tokenVencido');
+            }
+
             next();
         } else {
-            return responderAPI(res, 401, 'erro.sessaoExpirada');
+            return responderAPI(res, 401, 'erro_sessaoExpirada');
         }
-
     });
 };
-
 //#endregion _gerais/tratamentos

@@ -54,6 +54,11 @@
             "date": 1707661181901,
             "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\application-2024-02-11.log",
             "hash": "48df8a3985846cefc45159d077c87b19163552b2e104eeafbe6c0ee56a10e0da"
+        },
+        {
+            "date": 1707852497310,
+            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\application-2024-02-13.log",
+            "hash": "203dfbbdcce973fa398fce500a83fffe8e133d14a002836f0f417b6d51408500"
         }
     ],
     "hashType": "sha256"

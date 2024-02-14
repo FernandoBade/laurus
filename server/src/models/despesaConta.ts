@@ -7,7 +7,10 @@ const despesaContaSchema = new mongoose.Schema({
     despesaCategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCategoria', required: true },
     despesaSubcategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria', required: false },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
-    observacao: { type: String }
+    observacao: { type: String },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 const DespesaConta = mongoose.model('DespesaConta', despesaContaSchema, 'DespesaConta');

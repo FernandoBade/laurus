@@ -11,8 +11,10 @@ const despesaCartaoCreditoSchema = new mongoose.Schema({
     numeroParcelaAtual: { type: Number, required: false },
     totalParcelas: { type: Number, required: false },
     observacao: { type: String, required: false },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
-
 const DespesaCartaoCredito = mongoose.model('DespesaCartaoCredito', despesaCartaoCreditoSchema, 'DespesaCartaoCredito');
 
 export default DespesaCartaoCredito;

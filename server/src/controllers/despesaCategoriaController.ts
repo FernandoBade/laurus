@@ -5,11 +5,13 @@ import Usuario from '../models/usuario';
 
 const despesaCategoriaSchema = Joi.object({
     nome: Joi.string().required(),
-    usuario: Joi.string().required()
+    usuario: Joi.string().required(),
+    ativo: Joi.boolean()
 });
 
 const despesaCategoriaUpdateSchema = Joi.object({
-    nome: Joi.string().optional()
+    nome: Joi.string().optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class DespesaCategoriaController {

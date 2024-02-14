@@ -6,12 +6,14 @@ import ReceitaCategoria from '../models/receitaCategoria';
 const receitaSubcategoriaSchema = Joi.object({
     nome: Joi.string().required(),
     categoria: Joi.string().required(),
-    usuario: Joi.string().required()
+    usuario: Joi.string().required(),
+    ativo: Joi.boolean()
 });
 
 const receitaSubcategoriaUpdateSchema = Joi.object({
     nome: Joi.string().optional(),
     categoria: Joi.string().optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class ReceitaSubcategoriaController {

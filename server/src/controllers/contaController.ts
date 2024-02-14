@@ -8,14 +8,16 @@ const contaSchema = Joi.object({
     banco: Joi.string().required(),
     tipoConta: Joi.string().valid('Corrente', 'Salário', 'Poupança', 'Investimento').required(),
     observacao: Joi.string().optional(),
-    usuario: Joi.string().required()
+    usuario: Joi.string().required(),
+    ativo: Joi.boolean()
 });
 
 const contaUpdateSchema = Joi.object({
     nome: Joi.string().optional(),
     banco: Joi.string().optional(),
     tipoConta: Joi.string().valid('Corrente', 'Salário', 'Poupança', 'Investimento').optional(),
-    observacao: Joi.string().optional()
+    observacao: Joi.string().optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class ContaController {

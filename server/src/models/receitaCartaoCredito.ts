@@ -8,6 +8,9 @@ const receitaCartaoCreditoSchema = new mongoose.Schema({
     receitaSubcategoria: { type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaSubcategoria' },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag', required: false }],
     observacao: { type: String, required: false },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 const ReceitaCartaoCredito = mongoose.model('ReceitaCartaoCredito', receitaCartaoCreditoSchema, 'ReceitaCartaoCredito');

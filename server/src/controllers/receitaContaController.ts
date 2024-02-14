@@ -12,6 +12,7 @@ const receitaContaSchema = Joi.object({
     receitaSubcategoria: Joi.string().allow(null).optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 });
 
 const receitaContaUpdateSchema = Joi.object({
@@ -22,6 +23,7 @@ const receitaContaUpdateSchema = Joi.object({
     receitaSubcategoria: Joi.string().allow(null).optional(),
     tags: Joi.array().items(Joi.string()).optional(),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class ReceitaContaController {

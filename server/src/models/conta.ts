@@ -7,7 +7,10 @@ const contaSchema = new mongoose.Schema({
     observacao: { type: String },
     despesasConta: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaConta' }],
     receitasConta: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaConta' }],
-    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 const Conta = mongoose.model('Conta', contaSchema, 'Conta');

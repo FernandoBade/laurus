@@ -23,6 +23,7 @@ const despesaCartaoCreditoSchema = Joi.object({
         otherwise: Joi.forbidden()
     }),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 });
 
 const despesaCartaoCreditoUpdateSchema = Joi.object({
@@ -44,6 +45,7 @@ const despesaCartaoCreditoUpdateSchema = Joi.object({
         otherwise: Joi.forbidden()
     }),
     observacao: Joi.string().allow('').optional(),
+    ativo: Joi.boolean()
 }).min(1);
 
 class DespesaCartaoCreditoController {

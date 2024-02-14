@@ -7,7 +7,10 @@ const cartaoCreditoSchema = new mongoose.Schema({
     diaVencimentoFatura: { type: Number, required: true },
     despesasCartaoCredito: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaCartaoCredito' }],
     receitasCartaoCredito: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ReceitaCartaoCredito' }],
-    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true }
+    usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    ativo: { type: Boolean, default: true }
+}, {
+    timestamps: true
 });
 
 const CartaoCredito = mongoose.model('CartaoCredito', cartaoCreditoSchema, 'CartaoCredito');

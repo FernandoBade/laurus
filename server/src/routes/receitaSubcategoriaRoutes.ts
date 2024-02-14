@@ -1,12 +1,13 @@
 import express from 'express';
 import ReceitaaSubcategoriaController from '../controllers/receitaSubcategoriaController';
+import { validarToken } from '../utils/commons';
 
 const router = express.Router();
 
-router.post('/', ReceitaaSubcategoriaController.criarReceitaSubcategoria);
-router.get('/', ReceitaaSubcategoriaController.listarReceitaSubcategorias);
-router.get('/:id', ReceitaaSubcategoriaController.obterReceitaSubcategoriaPorId);
-router.put('/:id', ReceitaaSubcategoriaController.atualizarReceitaSubcategoria);
-router.delete('/:id', ReceitaaSubcategoriaController.excluirReceitaSubcategoria);
+router.post('/', validarToken, ReceitaaSubcategoriaController.criarReceitaSubcategoria);
+router.get('/', validarToken, ReceitaaSubcategoriaController.listarReceitaSubcategorias);
+router.get('/:id', validarToken, ReceitaaSubcategoriaController.obterReceitaSubcategoriaPorId);
+router.put('/:id', validarToken, ReceitaaSubcategoriaController.atualizarReceitaSubcategoria);
+router.delete('/:id', validarToken, ReceitaaSubcategoriaController.excluirReceitaSubcategoria);
 
 export default router;

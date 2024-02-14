@@ -1,12 +1,13 @@
 import express from 'express';
 import ReceitaCartaoCreditoController from '../controllers/receitaCartaoCreditoController';
+import { validarToken } from '../utils/commons';
 
 const router = express.Router();
 
-router.post('/', ReceitaCartaoCreditoController.criarReceitaCartaoCredito);
-router.get('/', ReceitaCartaoCreditoController.listarReceitasCartaoCredito);
-router.get('/:id', ReceitaCartaoCreditoController.obterReceitaCartaoCreditoPorId);
-router.put('/:id', ReceitaCartaoCreditoController.atualizarReceitaCartaoCredito);
-router.delete('/:id', ReceitaCartaoCreditoController.excluirReceitaCartaoCredito);
+router.post('/', validarToken, ReceitaCartaoCreditoController.criarReceitaCartaoCredito);
+router.get('/', validarToken, ReceitaCartaoCreditoController.listarReceitasCartaoCredito);
+router.get('/:id', validarToken, ReceitaCartaoCreditoController.obterReceitaCartaoCreditoPorId);
+router.put('/:id', validarToken, ReceitaCartaoCreditoController.atualizarReceitaCartaoCredito);
+router.delete('/:id', validarToken, ReceitaCartaoCreditoController.excluirReceitaCartaoCredito);
 
 export default router;
