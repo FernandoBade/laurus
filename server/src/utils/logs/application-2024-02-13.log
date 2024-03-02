@@ -53,3 +53,8 @@
 13-02-2024 19:53:51 [info]: Acesso realizado: 65cbce9a69120cb19b9d4b94
 13-02-2024 20:38:59 [info]: Usuário atualizado: 65cbce9a69120cb19b9d4b94
 13-02-2024 21:31:59 [info]: Acesso realizado: 65cbce9a69120cb19b9d4b94
+13-02-2024 22:40:13 [info]: Novo usuário registrado: 65cc19fd81481d0c665b61fc
+13-02-2024 22:52:13 [error]: Erro interno do servidor: TypeError: Cannot read properties of undefined (reading 'toObject')
+13-02-2024 22:55:58 [error]: Erro interno do servidor: TypeError: Cannot read properties of undefined (reading 'toObject')
+13-02-2024 22:57:06 [error]: Erro interno do servidor: TypeError: Cannot read properties of undefined (reading 'toObject')
+13-02-2024 23:01:50 [error]: Erro interno do servidor: TypeError: Cannot read properties of undefined (reading 'toObject')

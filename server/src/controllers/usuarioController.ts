@@ -36,12 +36,6 @@ const usuarioUpdateSchema = Joi.object({
 }).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone', 'ultimoAcesso', 'aparencia', 'idioma', 'moeda', 'formatoData');
 
 class UsuarioController {
-    static findByIdAndUpdate(id: any) {
-        throw new Error('Method not implemented.');
-    }
-    static findById(id: any) {
-        throw new Error('Method not implemented.');
-    }
     /**
     * Cadastra um novo usuário no sistema.
     * @param req Objeto da requisição, contendo os dados do novo usuário.
