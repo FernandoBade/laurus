@@ -1,9 +1,10 @@
-import { EnumMoedas, EnumIdiomas, EnumFormatoData, EnumAparencia } from '../utils/assets/enums';
+import { EnumMoedas, EnumIdiomas, EnumFormatoData, EnumAparencias } from '../utils/assets/enums';
 import logger, { resource, responderAPI } from '../utils/commons';
 import { Request, Response } from 'express';
 import Usuario from '../models/usuario';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
+import usuario from '../models/usuario';
 
 const usuarioSchema = Joi.object({
     nome: Joi.string().required(),
@@ -14,7 +15,7 @@ const usuarioSchema = Joi.object({
     telefone: Joi.string().optional(),
     ultimoAcesso: Joi.date().iso().optional(),
     ativo: Joi.boolean(),
-    aparencia: Joi.string().valid(...Object.values(EnumAparencia)).required(),
+    aparencia: Joi.string().valid(...Object.values(EnumAparencias)).required(),
     idioma: Joi.string().valid(...Object.values(EnumIdiomas)).required(),
     moeda: Joi.string().valid(...Object.values(EnumMoedas)).required(),
     formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).required()
@@ -29,7 +30,7 @@ const usuarioUpdateSchema = Joi.object({
     ultimoAcesso: Joi.date().iso().optional(),
     telefone: Joi.string().optional(),
     ativo: Joi.boolean(),
-    aparencia: Joi.string().valid(...Object.values(EnumAparencia)).optional(),
+    aparencia: Joi.string().valid(...Object.values(EnumAparencias)).optional(),
     idioma: Joi.string().valid(...Object.values(EnumIdiomas)).optional(),
     moeda: Joi.string().valid(...Object.values(EnumMoedas)).optional(),
     formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).optional()
@@ -46,7 +47,7 @@ class UsuarioController {
     static async cadastrarUsuario(req: Request, res: Response) {
         const { error: erro, value: valor } = usuarioSchema.validate(req.body);
         if (erro) {
-            return responderAPI(res, 400, 'erro_validacaoDadosUsuario', {}, erro.details.map((detalhe) => detalhe.message));
+            return responderAPI(res, 400, 'erro_validacaoJoi', erro.details.map((detalhe) => detalhe.message));
         }
 
         try {
@@ -58,10 +59,10 @@ class UsuarioController {
             const novoUsuarioDocument = await new Usuario(valor).save();
             const novoUsuario = novoUsuarioDocument.toObject();
 
-            responderAPI(res, 201, 'sucesso_registroNovoUsuario', { usuario: novoUsuario });
+            responderAPI(res, 201, 'sucesso_registroNovoUsuario', novoUsuario);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_registrarUsuario', {}, erro.toString());
+            responderAPI(res, 500, 'erro_registrarUsuario', erro.toString());
         }
     }
 
@@ -74,11 +75,11 @@ class UsuarioController {
     static async listarUsuarios(req: Request, res: Response) {
         try {
             const usuarios = await Usuario.find();
+            responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
 
-            responderAPI(res, 200, 'sucesso_listaUsuarios', { quantidade: usuarios.length }, usuarios);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_listarUsuarios', {}, erro.toString());
+            responderAPI(res, 500, 'erro_listarUsuarios', erro.toString());
         }
     }
 
@@ -95,10 +96,10 @@ class UsuarioController {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
             }
 
-            responderAPI(res, 200, 'sucesso_encontrarUsuario', {}, usuario);
+            responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_buscarUsuario', {}, erro.toString());
+            responderAPI(res, 500, 'erro_buscarUsuario', erro.toString());
         }
     }
 
@@ -116,10 +117,10 @@ class UsuarioController {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
             }
 
-            responderAPI(res, 200, 'sucesso_listaUsuarios', { quantidade: usuarios.length }, usuarios);
+            responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_listarUsuarios', {}, erro.toString());
+            responderAPI(res, 500, 'erro_listarUsuarios', erro.toString());
         }
     }
 
@@ -137,10 +138,10 @@ class UsuarioController {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
             }
 
-            responderAPI(res, 200, 'sucesso_encontrarUsuario', {}, usuario);
+            responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_buscarUsuario', {}, erro.toString());
+            responderAPI(res, 500, 'erro_buscarUsuario', erro.toString());
         }
     }
 
@@ -153,7 +154,7 @@ class UsuarioController {
     static async atualizarUsuario(req: Request, res: Response) {
         const { error: erro, value } = usuarioUpdateSchema.validate(req.body);
         if (erro) {
-            return responderAPI(res, 400, 'erro_validacaoDadosUsuario', {}, erro.details.map(detalhe => detalhe.message));
+            return responderAPI(res, 400, 'erro_validacaoDadosUsuario', erro.details.map(detalhe => detalhe.message));
         }
 
         try {
@@ -166,10 +167,10 @@ class UsuarioController {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
             }
 
-            responderAPI(res, 200, 'sucesso_atualizarUsuario', { usuario: usuarioParaAtualizar }, usuarioParaAtualizar);
+            responderAPI(res, 200, 'sucesso_atualizarUsuario', usuarioParaAtualizar);
         } catch (erro: any) {
             logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_atualizarUsuario', {}, erro.toString());
+            responderAPI(res, 500, 'erro_atualizarUsuario', erro.toString());
         }
     }
 
@@ -181,15 +182,26 @@ class UsuarioController {
     */
     static async excluirUsuario(req: Request, res: Response) {
         try {
-            const usuarioDeletado = await Usuario.findByIdAndDelete(req.params.id);
-            if (!usuarioDeletado) {
-                return responderAPI(res, 404, 'erro_encontrarUsuario');
+            const usuarioExistente = await Usuario.findById(req.params.id);
+
+            if (!usuarioExistente) {
+                return responderAPI(
+                    res,
+                    404,
+                    'erro_encontrarUsuario',
+                    { id: req.params.id }
+                );
             }
 
-            responderAPI(res, 200, 'sucesso_excluirUsuario', { usuario: usuarioDeletado });
+            await Usuario.findByIdAndDelete(req.params.id);
+
+            responderAPI(res, 200, 'sucesso_excluirUsuario', {}, { usuario: usuarioExistente });
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_excluirUsuario', {}, erro.toString());
+            logger.error(resource('log_erroInternoServidor', {
+                erro: erro.toString(),
+                stack: erro.stack
+            }));
+            responderAPI(res, 500, 'erro_internoServidor', { erro: erro.toString() });
         }
     }
 }

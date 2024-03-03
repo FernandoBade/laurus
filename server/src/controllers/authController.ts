@@ -46,13 +46,13 @@ class AuthController {
                 return responderAPI(res, 401, 'erro_senhaIncorreta', { idioma: usuario.idioma });
             }
 
-            const token = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '1h' });
+            const token = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '12h' });
             const tokenAtivo = jwt.sign({ id: usuario._id }, jwtSecretoRenovacao, { expiresIn: '7d' });
 
             await Usuario.findByIdAndUpdate(usuario._id, { tokenAtivo: tokenAtivo });
 
             logger.notice(resource('log_sucessoLogin', { id: usuario._id }));
-            responderAPI(res, 200, 'sucesso_login', { usuario: usuario }, { token: token, tokenAtivo: tokenAtivo });
+            responderAPI(res, 200, 'sucesso_login', { token: token }, { usuario: usuario });
         } catch (erro: any) {
             logger.error(resource('log_erroLogin', {
                 email: usuario && 'email' in usuario ? usuario.email : "Desconhecido",
@@ -87,64 +87,12 @@ class AuthController {
             }
 
             logger.notice(resource('log_sucessoLogout', { id: req.params.id }));
-            responderAPI(res, 200, 'sucesso_logout', { usuario: usuario });
+            responderAPI(res, 200, 'sucesso_logout', {}, { usuario: usuario });
         } catch (erro: any) {
             logger.error(resource('log_erroLogout', {
                 erro: erro.message || erro.toString()
             }));
             responderAPI(res, 500, 'erro_logout', {}, erro.toString());
-        }
-    }
-
-    /**
-    * Renova o Access Token de um usuário quando o atual expira.
-    * Isso é feito verificando a validade do Refresh Token fornecido.
-    * Se o Refresh Token for válido e estiver associado a um usuário, novos Access e Refresh Tokens são gerados.
-    *
-    * @param {Request} req - O objeto de requisição do Express, contendo o Refresh Token atual no corpo.
-    * @param {Response} res - O objeto de resposta do Express, usado para enviar a resposta ao cliente.
-    *
-    * Em caso de sucesso, retorna os novos tokens.
-    * Se o Refresh Token for inválido, expirado ou não estiver associado a um usuário, retorna um erro.
-    */
-    static async renovarToken(req: Request, res: Response) {
-        const { tokenAtivo } = req.body;
-
-        if (!tokenAtivo) {
-            return responderAPI(res, 401, 'erro_tokenRenovacaoInvalido');
-        }
-
-        const jwtSecreto = process.env.JWT_SECRETO;
-        const jwtSecretoRenovacao = process.env.JWT_SECRETO_RENOVACAO;
-
-        if (!jwtSecreto || !jwtSecretoRenovacao) {
-            throw new Error(resource('erro_variavelAmbiente'));
-        }
-
-        try {
-            const decoded = jwt.verify(tokenAtivo, jwtSecretoRenovacao);
-
-            if (typeof decoded === 'object' && 'id' in decoded) {
-                const usuario = await Usuario.findOne({ _id: decoded.id, tokenAtivo: tokenAtivo });
-
-                if (!usuario) {
-                    return responderAPI(res, 401, 'erro_tokenRenovacaoInvalido');
-                }
-
-                const novoToken = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '1h' });
-                const novoRenovaToken = jwt.sign({ id: usuario._id }, jwtSecretoRenovacao, { expiresIn: '7d' });
-
-                await Usuario.findByIdAndUpdate(usuario._id, { tokenAtivo: novoRenovaToken });
-                responderAPI(res, 200, 'sucesso_tokenRenovado', { token: novoToken, renovaToken: novoRenovaToken });
-            } else {
-                return responderAPI(res, 401, 'erro_tokenRenovacaoInvalido');
-            }
-        } catch (erro: any) {
-            logger.error(resource('log_erroRenovarToken', {
-                email: usuario && 'email' in usuario ? usuario.email : "Desconhecido",
-                erro: erro.message || erro.toString()
-            }));
-            responderAPI(res, 401, 'erro_tokenRenovacaoInvalido', {}, erro.toString());
         }
     }
 }

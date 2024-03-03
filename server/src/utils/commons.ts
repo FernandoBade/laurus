@@ -5,8 +5,8 @@ import path from 'path';
 import i18n from '../utils/assets/resources';
 import { Request, Response, NextFunction } from 'express';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
-import Usuario from '../controllers/usuarioController';
-
+import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
+import mongoose, { Model } from 'mongoose';
 require('dotenv').config();
 //#endregion _importacoes
 
@@ -89,12 +89,12 @@ export const logger = createLogger({
             )
         }),
         new transports.DailyRotateFile({
-            filename: `${logPath}/application-%DATE%.log`,
-            datePattern: 'YYYY-MM-DD',
+            filename: `${logPath}/laurus-%DATE%.log`,
+            datePattern: 'DD-MM-YYYY',
             zippedArchive: true,
             maxSize: '20m',
             maxFiles: '30d',
-            level: 'info',
+            level: 'notice',
             format: format.combine(
                 format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
                 format.printf(({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`)
@@ -104,52 +104,40 @@ export const logger = createLogger({
 });
 
 export default logger;
-
 //#endregion _logger
 
 //#region _date-fns
-import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
-import mongoose, { Model } from 'mongoose';
-import usuario from '../models/usuario';
-
-// Certifique-se de que esta função seja única no módulo e não tenha conflitos de nomeação
 export function formatarDataPadraoUsuario(data: string | Date, formato: string = 'dd/MM/yyyy'): string {
     const dataObj = typeof data === 'string' ? parseISO(data) : data;
     return formatDate(dataObj, formato);
 }
 
-// Analisa uma string de data no formato especificado para um objeto Date
 export function analisarData(dataString: string, formato: string = 'dd/MM/yyyy', referencia: Date = new Date()): Date {
     return parse(dataString, formato, referencia);
 }
 
-// Verifica se duas datas são iguais
 export function datasSaoIguais(data1: Date, data2: Date): boolean {
     return isEqual(data1, data2);
 }
 
-// Verifica se a primeira data é anterior à segunda
 export function dataEhAnterior(data1: Date, data2: Date): boolean {
     return isBefore(data1, data2);
 }
 
-// Verifica se a primeira data é posterior à segunda
 export function dataEhPosterior(data1: Date, data2: Date): boolean {
     return isAfter(data1, data2);
 }
 
-// Adiciona uma quantidade de dias a uma data
 export function adicionarDias(data: Date, quantidade: number): Date {
     return addDays(data, quantidade);
 }
 
-// Subtrai uma quantidade de dias de uma data
 export function subtrairDias(data: Date, quantidade: number): Date {
     return subDays(data, quantidade);
 }
 //#endregion _date-fns
 
-//#region _gerais/tratamentos
+//#region _gerais
 /**
 * Seleciona um número aleatório de tags de uma lista fornecida.
 *
@@ -207,25 +195,34 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 * @param res Objeto de resposta do Express.
 * @param status Código de status HTTP para a resposta.
 * @param chave Chave de internacionalização para a mensagem de resposta.
-* @param usuario Objeto do usuário para interpolação e idioma.
-* @param dados Opcionais dados adicionais para interpolação na mensagem.
+* @param payload Dados de retorno da requisição, opcional.
+* @param dados Valores e mensagens adicionais que serão adicionadas ao retorno, opcional.
 */
 export function responderAPI(
     res: Response,
     status: number,
     chave: string,
-    dados: Record<string, any> = {},
-    payload: any = null
+    payload: any = null,
+    dados: Record<string, any> = {} // Agora opcional e no final
 ) {
     const idioma = dados.idioma || 'pt-BR';
     const mensagem = i18n.t(chave, { lng: idioma, ...dados });
 
-    if (payload !== null) {
-        res.status(status).json({ mensagem, dados: payload });
-    } else {
-        res.status(status).json(status >= 400 ? { erro: mensagem } : { mensagem });
+    let resposta: any = { mensagem };
+
+    if (Array.isArray(payload)) {
+        resposta = { ...resposta, total: payload.length, resultados: payload };
+    } else if (payload !== null) {
+        resposta = { ...resposta, dados: payload };
     }
+
+    if (Object.keys(dados).length > 0) {
+        resposta.dadosAdicionais = dados;
+    }
+    res.status(status).json(resposta);
 }
+
+
 
 
 export const validarToken = (req: Request, res: Response, next: NextFunction) => {
@@ -244,7 +241,7 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
 
     jwt.verify(token, jwtSecreto, async (erro: VerifyErrors | null, decoded: any) => {
         if (erro) {
-            return responderAPI(res, 401, 'erro_sessaoExpirada', {}, erro.toString());
+            return responderAPI(res, 401, 'erro_sessaoExpirada', erro.toString(), {});
         }
 
         if (decoded && typeof decoded === 'object' && 'id' in decoded) {
@@ -261,4 +258,4 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
         }
     });
 };
-//#endregion _gerais/tratamentos
+//#endregion _gerais

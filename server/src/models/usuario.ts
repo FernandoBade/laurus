@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { EnumMoedas, EnumFormatoData, EnumIdiomas, EnumAparencia } from '../utils/assets/enums';
+import { EnumMoedas, EnumFormatoData, EnumIdiomas, EnumAparencias } from '../utils/assets/enums';
 import logger, { resource } from '../utils/commons';
 
 const usuarioSchema = new mongoose.Schema({
@@ -13,7 +13,7 @@ const usuarioSchema = new mongoose.Schema({
     tokenAtivo: { type: String },
     ativo: { type: Boolean, default: true },
     ultimoAcesso: { type: Date, default: Date.now() },
-    aparencia: { type: String, enum: EnumAparencia, default: EnumAparencia.DARK_MODE },
+    aparencia: { type: String, enum: EnumAparencias, default: EnumAparencias.DARK_MODE },
     idioma: { type: String, required: true, enum: EnumIdiomas, default: EnumIdiomas.PT_BR },
     moeda: { type: String, required: true, enum: EnumMoedas, default: EnumMoedas.BRL },
     formatoData: { type: String, required: true, enum: EnumFormatoData, default: EnumFormatoData.DD_MM_YYYY },
@@ -44,10 +44,10 @@ usuarioSchema.pre('save', async function (next) {
 });
 
 usuarioSchema.post('save', function (documento, next) {
-    (documento as any)._wasNew ?
-        logger.info(resource('log_sucessoCadastroUsuario', { id: documento._id })) :
+    documento.createdAt.getTime() === documento.updatedAt.getTime() ?
+        logger.info(resource('log_sucessoCadastroUsuario', { id: documento._id }))
+        :
         logger.notice(resource('log_sucessoAtualizarUsuario', { id: documento._id }));
-
     next();
 });
 

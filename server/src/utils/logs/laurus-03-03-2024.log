@@ -1,0 +1,26 @@
+03-03-2024 01:06:24 [info]: Novo usuário registrado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:06:37 [info]: Novo cartão de crédito registrado com sucesso: 65e3f74c885a66026484fea5
+03-03-2024 01:06:37 [info]: Novo usuário registrado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:06:58 [notice]: Cartão de crédito atualizado com sucesso: 65e3f74c885a66026484fea5
+03-03-2024 01:07:05 [warning]: Cartão de crédito excluído com sucesso: 65e3f74c885a66026484fea5
+03-03-2024 01:07:05 [notice]: Usuário atualizado com sucesso 65e3f740885a66026484fea1
+03-03-2024 01:07:18 [error]: log_erroExcluirCartaoCredito
+03-03-2024 01:09:06 [info]: Novo cartão de crédito registrado com sucesso: 65e3f7e21b22328186964b92
+03-03-2024 01:09:06 [info]: Novo usuário registrado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:09:13 [warning]: Cartão de crédito excluído com sucesso: 65e3f7e21b22328186964b92
+03-03-2024 01:09:13 [notice]: Usuário atualizado com sucesso 65e3f740885a66026484fea1
+03-03-2024 01:09:18 [error]: Erro interno do servidor: CastError: Cast to ObjectId failed for value "65e3f7e21b22328186964b92a" (type string) at path "_id" for model "CartaoCredito"
+03-03-2024 01:11:04 [info]: Novo cartão de crédito registrado com sucesso: 65e3f858ed858555a768c448
+03-03-2024 01:11:04 [info]: Novo usuário registrado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:11:10 [notice]: Cartão de crédito atualizado com sucesso: 65e3f858ed858555a768c448
+03-03-2024 01:11:15 [warning]: Cartão de crédito excluído com sucesso: 65e3f858ed858555a768c448
+03-03-2024 01:11:15 [notice]: Usuário atualizado com sucesso 65e3f740885a66026484fea1
+03-03-2024 01:11:20 [error]: Erro interno do servidor: CastError: Cast to ObjectId failed for value "65e3f858ed858555a768c448a" (type string) at path "_id" for model "CartaoCredito"
+03-03-2024 01:11:51 [info]: Novo cartão de crédito registrado com sucesso: 65e3f887ed858555a768c456
+03-03-2024 01:11:51 [info]: Novo usuário registrado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:15:33 [info]: Novo cartão de crédito registrado com sucesso: 65e3f965e22d5863a4b6333f
+03-03-2024 01:15:33 [notice]: Cartão de crédito atualizado com sucesso: 65e3f740885a66026484fea1
+03-03-2024 01:16:36 [info]: Novo cartão de crédito registrado com sucesso: 65e3f9a467e05fbe81b42864
+03-03-2024 01:16:36 [notice]: Usuário atualizado com sucesso 65e3f740885a66026484fea1
+03-03-2024 01:16:51 [warning]: Cartão de crédito excluído com sucesso: 65e3f9a467e05fbe81b42864
+03-03-2024 01:16:51 [notice]: Usuário atualizado com sucesso 65e3f740885a66026484fea1
