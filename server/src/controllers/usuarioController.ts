@@ -47,7 +47,7 @@ class UsuarioController {
     static async cadastrarUsuario(req: Request, res: Response) {
         const { error: erro, value: valor } = usuarioSchema.validate(req.body);
         if (erro) {
-            return responderAPI(res, 400, 'erro_validacaoJoi', erro.details.map((detalhe) => detalhe.message));
+            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
         }
 
         try {
@@ -61,8 +61,8 @@ class UsuarioController {
 
             responderAPI(res, 201, 'sucesso_registroNovoUsuario', novoUsuario);
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_registrarUsuario', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -78,8 +78,8 @@ class UsuarioController {
             responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
 
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_listarUsuarios', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -98,8 +98,8 @@ class UsuarioController {
 
             responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_buscarUsuario', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -119,8 +119,8 @@ class UsuarioController {
 
             responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_listarUsuarios', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -140,8 +140,8 @@ class UsuarioController {
 
             responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_buscarUsuario', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -152,25 +152,25 @@ class UsuarioController {
     * Valida os dados fornecidos e, se válidos, atualiza o usuário correspondente ao ID fornecido.
     */
     static async atualizarUsuario(req: Request, res: Response) {
-        const { error: erro, value } = usuarioUpdateSchema.validate(req.body);
+        const { error: erro, value: valor } = usuarioUpdateSchema.validate(req.body);
         if (erro) {
-            return responderAPI(res, 400, 'erro_validacaoDadosUsuario', erro.details.map(detalhe => detalhe.message));
+            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
         }
 
         try {
-            if (value.senha) {
-                value.senha = await bcrypt.hash(value.senha, 10);
+            if (valor.senha) {
+                valor.senha = await bcrypt.hash(valor.senha, 10);
             }
 
-            const usuarioParaAtualizar = await Usuario.findByIdAndUpdate(req.params.id, value, { new: true });
+            const usuarioParaAtualizar = await Usuario.findByIdAndUpdate(req.params.id, valor, { new: true });
             if (!usuarioParaAtualizar) {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
             }
 
             responderAPI(res, 200, 'sucesso_atualizarUsuario', usuarioParaAtualizar);
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', { erro: erro.toString() }));
-            responderAPI(res, 500, 'erro_atualizarUsuario', erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -197,11 +197,8 @@ class UsuarioController {
 
             responderAPI(res, 200, 'sucesso_excluirUsuario', {}, { usuario: usuarioExistente });
         } catch (erro: any) {
-            logger.error(resource('log_erroInternoServidor', {
-                erro: erro.toString(),
-                stack: erro.stack
-            }));
-            responderAPI(res, 500, 'erro_internoServidor', { erro: erro.toString() });
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 }

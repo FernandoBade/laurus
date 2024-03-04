@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import Conta from '../models/conta';
 import Usuario from '../models/usuario';
+import { logger, resource, responderAPI } from '../utils/commons';
+import { EnumTipoConta } from '../utils/assets/enums';
 
 const contaSchema = Joi.object({
     nome: Joi.string().required(),
     banco: Joi.string().required(),
-    tipoConta: Joi.string().valid('Corrente', 'Salário', 'Poupança', 'Investimento').required(),
+    tipoConta: Joi.string().valid(...Object.values(EnumTipoConta)).required(),
     observacao: Joi.string().optional(),
     usuario: Joi.string().required(),
     ativo: Joi.boolean()
@@ -15,88 +17,95 @@ const contaSchema = Joi.object({
 const contaUpdateSchema = Joi.object({
     nome: Joi.string().optional(),
     banco: Joi.string().optional(),
-    tipoConta: Joi.string().valid('Corrente', 'Salário', 'Poupança', 'Investimento').optional(),
+    tipoConta: Joi.string().valid(...Object.values(EnumTipoConta)).optional(),
     observacao: Joi.string().optional(),
     ativo: Joi.boolean()
 }).min(1);
 
 class ContaController {
     static async criarConta(req: Request, res: Response) {
-        const { error, value } = contaSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
+        const { error: erro, value: valor } = contaSchema.validate(req.body);
+        if (erro) {
+            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
+        }
 
         try {
-            const usuarioExistente = await Usuario.findById(value.usuario);
-            if (!usuarioExistente) return res.status(404).json({ error: 'Usuário não encontrado' });
+            const usuarioExistente = await Usuario.findById(valor.usuario);
+            if (!usuarioExistente) {
+                return responderAPI(res, 404, "erro_usuarioNaoEncontrado");
+            }
 
-            const novaConta = new Conta(value);
+            const novaConta = new Conta(valor);
             await novaConta.save();
 
             usuarioExistente.contas.push(novaConta._id);
             await usuarioExistente.save();
 
-            res.status(201).json(novaConta);
-        } catch (e: any) {
-            res.status(500).json({ error: e.message });
+            responderAPI(res, 201, "sucesso_contaCriada", novaConta);
+        } catch (erro: any) {
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
     static async listarContas(req: Request, res: Response) {
         try {
             const contas = await Conta.find();
-            res.json(contas);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao listar contas' });
+            responderAPI(res, 200, "sucesso_listaContas", contas);
+        } catch (erro: any) {
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
     static async obterContaPorId(req: Request, res: Response) {
-        const { id } = req.params;
         try {
-            const conta = await Conta.findById(id);
-            if (!conta) return res.status(404).json({ error: 'Conta não encontrada' });
-            res.json(conta);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao obter conta' });
+            const conta = await Conta.findById(req.params.id);
+            if (!conta) {
+                return responderAPI(res, 404, "erro_contaNaoEncontrada");
+            }
+            responderAPI(res, 200, "sucesso_contaEncontrada", conta);
+        } catch (erro: any) {
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
     static async atualizarConta(req: Request, res: Response) {
-        const { id } = req.params;
-        const { error, value } = contaUpdateSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
+        const { error: erro, value: valor } = contaUpdateSchema.validate(req.body);
+        if (erro) {
+            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
+        }
 
         try {
-            const contaAtualizada = await Conta.findByIdAndUpdate(id, value, { new: true });
-            if (!contaAtualizada) return res.status(404).json({ error: 'Conta não encontrada' });
-            res.json(contaAtualizada);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao atualizar conta' });
+            const contaAtualizada = await Conta.findByIdAndUpdate(req.params.id, valor, { new: true });
+            if (!contaAtualizada) {
+                return responderAPI(res, 404, "erro_contaNaoEncontrada");
+            }
+            responderAPI(res, 200, "sucesso_contaAtualizada", contaAtualizada);
+        } catch (erro: any) {
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
     static async excluirConta(req: Request, res: Response) {
-        const { id } = req.params;
         try {
-            const conta = await Conta.findById(id).populate('usuario', 'nome');
-            if (!conta) return res.status(404).json({ error: 'Conta não encontrada' });
-
-            const nomeUsuario = conta.usuario && 'nome' in conta.usuario ? conta.usuario['nome'] : 'Desconhecido';
-
-            await Conta.findByIdAndDelete(id);
-
-            if (conta.usuario && conta.usuario._id) {
-                await Usuario.findByIdAndUpdate(conta.usuario._id, { $pull: { contas: conta._id } });
+            const conta = await Conta.findById(req.params.id);
+            if (!conta) {
+                return responderAPI(res, 404, "erro_contaNaoEncontrada");
             }
 
-            res.status(200).json({ message: `Conta excluída com sucesso, e vínculo com ${nomeUsuario} removido.` });
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao excluir conta com o ID ${id}:`, error.message);
-                res.status(400 | 401).json({ error: 'Erro ao excluir conta.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
+            await Conta.findByIdAndDelete(req.params.id);
+
+            if (conta.usuario) {
+                await Usuario.findByIdAndUpdate(conta.usuario, { $pull: { contas: conta._id } });
             }
+
+            responderAPI(res, 200, "sucesso_excluirConta", { conta: conta });
+        } catch (erro: any) {
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 }

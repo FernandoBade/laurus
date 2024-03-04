@@ -28,6 +28,14 @@ export enum EnumMoedas {
     UYU = "UYU"
 }
 
+export enum EnumTipoConta{
+    CORRENTE = "Corrente",
+    POUPANCA = "Poupança",
+    INVESTIMENTO = "Investimento",
+    SALARIO = "Salário",
+    OUTRA = "Outra"
+}
+
 export enum EnumBandeiras {
     VISA = "Visa",
     MASTERCARD = "MasterCard",

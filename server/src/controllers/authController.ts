@@ -54,11 +54,8 @@ class AuthController {
             logger.notice(resource('log_sucessoLogin', { id: usuario._id }));
             responderAPI(res, 200, 'sucesso_login', { token: token }, { usuario: usuario });
         } catch (erro: any) {
-            logger.error(resource('log_erroLogin', {
-                email: usuario && 'email' in usuario ? usuario.email : "Desconhecido",
-                erro: erro.message || erro.toString()
-            }));
-            responderAPI(res, 500, 'erro_login', {}, erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
@@ -89,10 +86,8 @@ class AuthController {
             logger.notice(resource('log_sucessoLogout', { id: req.params.id }));
             responderAPI(res, 200, 'sucesso_logout', {}, { usuario: usuario });
         } catch (erro: any) {
-            logger.error(resource('log_erroLogout', {
-                erro: erro.message || erro.toString()
-            }));
-            responderAPI(res, 500, 'erro_logout', {}, erro.toString());
+            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
+            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 }
