@@ -1,0 +1,66 @@
+05-03-2024 00:15:06 [warning]: Tentativa de acesso com senha incorreta: pudao@dota2.com
+05-03-2024 00:15:12 [notice]: Usuário atualizado com sucesso 65e35e482e3d2bb2fa2447f2
+05-03-2024 00:15:12 [notice]: Acesso realizado com sucesso: 65e35e482e3d2bb2fa2447f2
+05-03-2024 00:16:03 [info]: Nova despesa no cartão de crédito cadastrada com sucesso: 65e68e731f1a910301e9dcb6
+05-03-2024 00:16:03 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:16:08 [info]: Nova despesa no cartão de crédito cadastrada com sucesso: 65e68e781f1a910301e9dcbc
+05-03-2024 00:16:08 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:16:11 [info]: Nova despesa no cartão de crédito cadastrada com sucesso: 65e68e7b1f1a910301e9dcc2
+05-03-2024 00:16:11 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:16:27 [notice]: Despesa no cartão de crédito atualizada com sucesso: 65e68e7b1f1a910301e9dcc2
+05-03-2024 00:16:43 [notice]: Despesa no cartão de crédito atualizada com sucesso: 65e68e7b1f1a910301e9dcc2
+05-03-2024 00:16:49 [error]: Erro interno do servidor. CastError: Cast to ObjectId failed for value "65e68e7b1f1a910301e9dcc2a" (type string) at path "_id" for model "DespesaCartaoCredito"
+    at SchemaObjectId.cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\schema\objectId.js:250:11)
+    at SchemaObjectId.SchemaType.applySetters (C:\GitHub\laurus\server\node_modules\mongoose\lib\schemaType.js:1219:12)
+    at SchemaObjectId.SchemaType.castForQuery (C:\GitHub\laurus\server\node_modules\mongoose\lib\schemaType.js:1633:15)
+    at cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\cast.js:375:32)
+    at model.Query.Query.cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:4768:12)
+    at model.Query.Query._castConditions (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:2200:10)
+    at model.Query._findOneAndUpdate (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:3242:8)
+    at model.Query.exec (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:4290:80)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async atualizarDespesaCartaoCredito (C:\GitHub\laurus\server\src\controllers\despesaCartaoCreditoController.ts:123:52)
+05-03-2024 00:16:53 [notice]: Despesa no cartão de crédito atualizada com sucesso: 65e68e7b1f1a910301e9dcc2
+05-03-2024 00:17:37 [warning]: Despesa no cartão de crédito excluída com sucesso: 65e68e781f1a910301e9dcbc
+05-03-2024 00:17:37 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:17:42 [warning]: Despesa no cartão de crédito excluída com sucesso: 65e68e7b1f1a910301e9dcc2
+05-03-2024 00:17:42 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:17:52 [warning]: Despesa no cartão de crédito excluída com sucesso: 65e554b47653e68fe0899f7d
+05-03-2024 00:17:52 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 00:18:06 [warning]: Despesa no cartão de crédito excluída com sucesso: 65e68e731f1a910301e9dcb6
+05-03-2024 00:18:06 [notice]: Cartão de crédito atualizado com sucesso: 65e3d8db6085a3b531c3b3aa
+05-03-2024 01:52:59 [info]: Nova categoria de despesa criada com sucesso: 65e6a52b8c6d00573e428afe
+05-03-2024 01:53:00 [error]: Erro interno do servidor. TypeError: Cannot read properties of undefined (reading 'getTime')
+    at model.<anonymous> (C:\GitHub\laurus\server\src\models\usuario.ts:47:25)
+    at callMiddlewareFunction (C:\GitHub\laurus\server\node_modules\kareem\index.js:628:27)
+    at next (C:\GitHub\laurus\server\node_modules\kareem\index.js:263:9)
+    at Kareem.execPost (C:\GitHub\laurus\server\node_modules\kareem\index.js:296:3)
+    at _cb (C:\GitHub\laurus\server\node_modules\kareem\index.js:420:15)
+    at C:\GitHub\laurus\server\node_modules\mongoose\lib\model.js:465:5
+    at C:\GitHub\laurus\server\node_modules\mongoose\lib\model.js:361:9
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+05-03-2024 01:54:16 [info]: Nova categoria de despesa criada com sucesso: 65e6a5788c6d00573e428b03
+05-03-2024 01:54:16 [notice]: Usuário atualizado com sucesso 65e35e482e3d2bb2fa2447f2
+05-03-2024 01:54:28 [error]: Erro interno do servidor. MongoServerError: E11000 duplicate key error collection: laurus-db.DespesaCategoria index: nome_1_usuario_1 dup key: { nome: "Contas de Consumo", usuario: ObjectId('65e35e482e3d2bb2fa2447f2') }
+    at InsertOneOperation.execute (C:\GitHub\laurus\server\node_modules\mongoose\node_modules\mongodb\src\operations\insert.ts:79:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async executeOperationAsync (C:\GitHub\laurus\server\node_modules\mongoose\node_modules\mongodb\src\operations\execute_operation.ts:190:12)
+05-03-2024 01:54:40 [info]: Nova categoria de despesa criada com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:54:40 [notice]: Usuário atualizado com sucesso 65e35e482e3d2bb2fa2447f2
+05-03-2024 01:55:24 [error]: Erro interno do servidor. CastError: Cast to ObjectId failed for value "65e6a5908c6d00573e428b0ca" (type string) at path "_id" for model "DespesaCategoria"
+    at SchemaObjectId.cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\schema\objectId.js:250:11)
+    at SchemaObjectId.SchemaType.applySetters (C:\GitHub\laurus\server\node_modules\mongoose\lib\schemaType.js:1219:12)
+    at SchemaObjectId.SchemaType.castForQuery (C:\GitHub\laurus\server\node_modules\mongoose\lib\schemaType.js:1633:15)
+    at cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\cast.js:375:32)
+    at model.Query.Query.cast (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:4768:12)
+    at model.Query.Query._castConditions (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:2200:10)
+    at model.Query._findOne (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:2484:8)
+    at model.Query.exec (C:\GitHub\laurus\server\node_modules\mongoose\lib\query.js:4290:80)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async obterDespesaCategoriaPorId (C:\GitHub\laurus\server\src\controllers\despesaCategoriaController.ts:52:38)
+05-03-2024 01:56:01 [notice]: Categoria de despesa atualizada com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:56:33 [notice]: Categoria de despesa atualizada com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:56:36 [notice]: Categoria de despesa atualizada com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:56:41 [notice]: Categoria de despesa atualizada com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:57:00 [warning]: Categoria de despesa excluída com sucesso: 65e6a5908c6d00573e428b0c
+05-03-2024 01:57:00 [notice]: Usuário atualizado com sucesso 65e35e482e3d2bb2fa2447f2

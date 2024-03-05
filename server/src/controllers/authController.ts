@@ -24,9 +24,7 @@ class AuthController {
     static async login(req: Request, res: Response) {
         const jwtSecreto = process.env.JWT_SECRETO;
         const jwtSecretoRenovacao = process.env.JWT_SECRETO_RENOVACAO;
-        if (!jwtSecreto || !jwtSecretoRenovacao) {
-            throw new Error(resource('erro_variavelAmbiente'));
-        }
+        if (!jwtSecreto || !jwtSecretoRenovacao) throw new Error(resource('erro_variavelAmbiente'));
 
         try {
             const idiomaRequisicao = req.headers['accept-language']?.split(',')[0] || 'pt-BR';

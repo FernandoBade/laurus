@@ -37,165 +37,100 @@ const usuarioUpdateSchema = Joi.object({
 }).or('nome', 'sobrenome', 'email', 'senha', 'dataNascimento', 'telefone', 'ultimoAcesso', 'aparencia', 'idioma', 'moeda', 'formatoData');
 
 class UsuarioController {
-    /**
-    * Cadastra um novo usuário no sistema.
-    * @param req Objeto da requisição, contendo os dados do novo usuário.
-    * @param res Objeto da resposta, utilizado para enviar o feedback da operação.
-    * Valida os dados do usuário utilizando um schema Joi e, se válido, verifica a existência do e-mail.
-    * Se o e-mail não estiver registrado, cria um novo usuário e o salva no banco de dados.
-    */
     static async cadastrarUsuario(req: Request, res: Response) {
         const { error: erro, value: valor } = usuarioSchema.validate(req.body);
-        if (erro) {
-            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
-        }
+        if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
+
+        const usuarioExistente = await Usuario.findOne({ email: valor.email });
+        if (usuarioExistente) return responderAPI(res, 400, 'erro_emailJaCadastrado');
 
         try {
-            const usuarioExistente = await Usuario.findOne({ email: valor.email });
-            if (usuarioExistente) {
-                return responderAPI(res, 400, 'erro_emailJaCadastrado');
-            }
-
             const novoUsuarioDocument = await new Usuario(valor).save();
             const novoUsuario = novoUsuarioDocument.toObject();
 
-            responderAPI(res, 201, 'sucesso_registroNovoUsuario', novoUsuario);
+            responderAPI(res, 201, 'sucesso_cadastrar', novoUsuario);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Lista todos os usuários cadastrados no sistema.
-    * @param req Objeto da requisição.
-    * @param res Objeto da resposta, utilizado para enviar a lista de usuários.
-    * Recupera todos os usuários do banco de dados e os retorna em formato JSON.
-    */
     static async listarUsuarios(req: Request, res: Response) {
         try {
             const usuarios = await Usuario.find();
-            responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
 
+            responderAPI(res, 200, 'sucesso_buscar', usuarios);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Obtém detalhes de um usuário específico pelo seu ID.
-    * @param req Objeto da requisição, contendo o ID do usuário como parâmetro de rota.
-    * @param res Objeto da resposta, utilizado para enviar os detalhes do usuário ou uma mensagem de erro.
-    * Busca um usuário pelo ID fornecido. Se encontrado, retorna os detalhes do usuário.
-    */
     static async obterUsuarioPorId(req: Request, res: Response) {
         try {
             const usuario = await Usuario.findById(req.params.id);
-            if (!usuario) {
-                return responderAPI(res, 404, 'erro_encontrarUsuario');
-            }
+            if (!usuario) return responderAPI(res, 404, 'erro_encontrarUsuario');
 
-            responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
+            responderAPI(res, 200, 'sucesso_buscar', usuario);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Busca usuários por nome ou sobrenome.
-    * @param req Objeto da requisição, contendo o nome ou sobrenome como parâmetro de rota.
-    * @param res Objeto da resposta, utilizado para enviar a lista de usuários encontrados ou uma mensagem de erro.
-    * Utiliza uma expressão regular para encontrar usuários que correspondam ao nome ou sobrenome fornecido.
-    */
     static async obterUsuariosPorNome(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.nome, 'i');
-            const usuarios = await Usuario.find({ $or: [{ nome: regex }, { sobrenome: regex }] }).sort({ nome: 1 });
-            if (!usuarios.length) {
-                return responderAPI(res, 404, 'erro_encontrarUsuario');
-            }
 
-            responderAPI(res, 200, 'sucesso_listaUsuarios', usuarios);
+            const usuarios = await Usuario.find({ $or: [{ nome: regex }, { sobrenome: regex }] }).sort({ nome: 1 });
+            if (!usuarios.length) return responderAPI(res, 404, 'erro_encontrarUsuario');
+
+            responderAPI(res, 200, 'sucesso_buscar', usuarios);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Busca usuários pelo endereço de e-mail.
-    * @param req Objeto da requisição, contendo o e-mail como parâmetro de rota.
-    * @param res Objeto da resposta, utilizado para enviar a lista de usuários encontrados ou uma mensagem de erro.
-    * Utiliza uma expressão regular para encontrar usuários que correspondam ao e-mail fornecido.
-    */
     static async obterUsuarioPorEmail(req: Request, res: Response) {
         try {
             const regex = new RegExp(req.params.email, 'i');
-            const usuario = await Usuario.find({ email: regex }).sort({ email: 1 });
-            if (!usuario.length) {
-                return responderAPI(res, 404, 'erro_encontrarUsuario');
-            }
 
-            responderAPI(res, 200, 'sucesso_encontrarUsuario', usuario);
+            const usuario = await Usuario.find({ email: regex }).sort({ email: 1 });
+            if (!usuario.length) return responderAPI(res, 404, 'erro_encontrarUsuario');
+
+            responderAPI(res, 200, 'sucesso_buscar', usuario);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Atualiza os dados de um usuário existente.
-    * @param req Objeto da requisição, contendo os dados atualizados do usuário e o ID como parâmetro de rota.
-    * @param res Objeto da resposta, utilizado para enviar a confirmação da atualização ou uma mensagem de erro.
-    * Valida os dados fornecidos e, se válidos, atualiza o usuário correspondente ao ID fornecido.
-    */
     static async atualizarUsuario(req: Request, res: Response) {
         const { error: erro, value: valor } = usuarioUpdateSchema.validate(req.body);
-        if (erro) {
-            return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
-        }
+        if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
 
         try {
-            if (valor.senha) {
-                valor.senha = await bcrypt.hash(valor.senha, 10);
-            }
+            if (valor.senha) valor.senha = await bcrypt.hash(valor.senha, 10);
 
             const usuarioParaAtualizar = await Usuario.findByIdAndUpdate(req.params.id, valor, { new: true });
-            if (!usuarioParaAtualizar) {
-                return responderAPI(res, 404, 'erro_encontrarUsuario');
-            }
+            if (!usuarioParaAtualizar) return responderAPI(res, 404, 'erro_naoEncontrado');
 
-            responderAPI(res, 200, 'sucesso_atualizarUsuario', usuarioParaAtualizar);
+            responderAPI(res, 200, 'sucesso_atualizar', usuarioParaAtualizar);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Exclui um usuário do sistema pelo seu ID.
-    * @param req Objeto da requisição, contendo o ID do usuário como parâmetro de rota.
-    * @param res Objeto da resposta, utilizado para enviar a confirmação da exclusão ou uma mensagem de erro.
-    * Busca e exclui o usuário correspondente ao ID fornecido.
-    */
     static async excluirUsuario(req: Request, res: Response) {
         try {
             const usuarioExistente = await Usuario.findById(req.params.id);
-
-            if (!usuarioExistente) {
-                return responderAPI(
-                    res,
-                    404,
-                    'erro_encontrarUsuario',
-                    { id: req.params.id }
-                );
-            }
+            if (!usuarioExistente) return responderAPI(res, 404, 'erro_naoEncontrado', { id: req.params.id });
 
             await Usuario.findByIdAndDelete(req.params.id);
 
-            responderAPI(res, 200, 'sucesso_excluirUsuario', {}, { usuario: usuarioExistente });
+            responderAPI(res, 200, 'sucesso_excluir', usuarioExistente);
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });

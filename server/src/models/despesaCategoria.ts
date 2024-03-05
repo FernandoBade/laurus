@@ -3,7 +3,7 @@ import logger, { resource } from '../utils/commons';
 
 const despesaCategoriaSchema = new mongoose.Schema({
     nome: { type: String, required: true },
-    receitaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria' }],
+    despesaSubcategorias: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DespesaSubcategoria' }],
     usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
     ativo: { type: Boolean, default: true }
 }, {
