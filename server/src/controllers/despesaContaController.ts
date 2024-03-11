@@ -1,164 +1,88 @@
-import { Request, Response } from 'express';
-import Joi from 'joi';
-import mongoose from 'mongoose';
-import DespesaConta from '../models/despesaConta';
 import Conta from '../models/conta';
-
-const despesaContaSchema = Joi.object({
-    conta: Joi.string().required(),
-    valor: Joi.number().required(),
-    dataTransacao: Joi.date().iso().required(),
-    despesaCategoria: Joi.string().required(),
-    despesaSubcategoria: Joi.string().allow(null).optional(),
-    tags: Joi.array().items(Joi.string()).optional(),
-    observacao: Joi.string().allow('').optional(),
-    ativo: Joi.boolean()
-});
-
-const despesaContaUpdateSchema = Joi.object({
-    conta: Joi.string().optional(),
-    valor: Joi.number().optional(),
-    dataTransacao: Joi.date().iso().optional(),
-    despesaCategoria: Joi.string().optional(),
-    despesaSubcategoria: Joi.string().allow(null).optional(),
-    tags: Joi.array().items(Joi.string()).optional(),
-    observacao: Joi.string().allow('').optional(),
-    ativo: Joi.boolean()
-}).min(1);
+import DespesaConta from '../models/despesaConta';
+import { responderAPI } from '../utils/commons';
+import { Request, Response, NextFunction } from 'express';
 
 class DespesaContaController {
-    static async criarDespesaConta(req: Request, res: Response) {
-        const { error, value } = despesaContaSchema.validate(req.body, { presence: 'required' });
-        if (error) {
-            return res.status(400).json({ error: error.details[0].message });
-        }
-
-        const contaExiste = await Conta.findById(value.conta);
-        if (!contaExiste) {
-            return res.status(404).json({ error: 'Conta não encontrada.' });
-        }
+    static async criarDespesaConta(req: Request, res: Response, next: NextFunction) {
+        const contaExiste = await Conta.findById(req.body.conta);
+        if (!contaExiste) return responderAPI(res, 404, "erro_encontrar");
 
         try {
-            const novaDespesaConta = new DespesaConta({
-                ...value,
-                conta: new mongoose.Types.ObjectId(value.conta),
-                despesaCategoria: new mongoose.Types.ObjectId(value.despesaCategoria),
-                despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : null,
-                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
-            });
-            await novaDespesaConta.save();
-            await Conta.findByIdAndUpdate(value.conta, { $push: { despesasConta: novaDespesaConta._id } });
+            const novaDespesaConta = await new DespesaConta(req.body).save();
 
-            res.status(201).json(novaDespesaConta);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao criar despesa.`, error.message);
-                console.error(error.stack);
-                res.status(400).json({ error: 'Erro ao criar despesa.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor' });
-            }
+            await Conta.findByIdAndUpdate(
+                req.body.conta,
+                { $push: { despesasConta: novaDespesaConta._id } },
+                { new: true }
+            );
+
+            responderAPI(res, 201, "sucesso_cadastrar", novaDespesaConta);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async listarDespesasConta(req: Request, res: Response) {
+
+    static async listarDespesasConta(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesasConta = await DespesaConta.find();
-            res.json(despesasConta);
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao listar despesas:`, error.message);
-                console.error(error.stack);
-                res.status(400 | 401).json({ error: 'Erro ao listar despesas.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            const despesasConta = await DespesaConta.find(req.query);
+
+            responderAPI(res, 200, "sucesso_buscar", despesasConta);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async obterDespesaContaPorId(req: Request, res: Response) {
-        const { id } = req.params;
-
+    static async obterDespesaContaPorId(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaConta = await DespesaConta.findById(id);
-            if (despesaConta) {
-                res.json(despesaConta);
-            } else {
-                console.log(`Despesa com ID ${id} não encontrada.`);
-                res.status(404).json({ error: 'Despesa não encontrada' });
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao obter despesa com o ID ${id}:`, error.message);
-                console.error(error.stack);
-                res.status(400 | 401).json({ error: 'Erro ao obter despesa.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            const despesaConta = await DespesaConta.findById(req.params.id);
+            if (!despesaConta) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_buscar", despesaConta);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async atualizarDespesaConta(req: Request, res: Response) {
-        const { id } = req.params;
-        const { error, value } = despesaContaUpdateSchema.validate(req.body);
 
-        if (error) {
-            return res.status(400).json({ error: error.details[0].message });
-        }
-
+    static async atualizarDespesaConta(req: Request, res: Response, next: NextFunction) {
         try {
-            const updateObj = {
-                ...value,
-                conta: value.conta ? new mongoose.Types.ObjectId(value.conta) : undefined,
-                despesaCategoria: value.despesaCategoria ? new mongoose.Types.ObjectId(value.despesaCategoria) : undefined,
-                despesaSubcategoria: value.despesaSubcategoria ? new mongoose.Types.ObjectId(value.despesaSubcategoria) : undefined,
-                tags: value.tags ? value.tags.map((tag: string) => new mongoose.Types.ObjectId(tag)) : undefined
-            };
+            const despesaContaAtualizada = await DespesaConta.findByIdAndUpdate(
+                req.params.id,
+                { $set: req.body },
+                { new: true }
+            );
 
-            const despesaContaAtualizada = await DespesaConta.findByIdAndUpdate(id, updateObj, { new: true });
-            if (despesaContaAtualizada) {
-                res.json(despesaContaAtualizada);
-            } else {
-                res.status(404).json({ error: 'Despesa não encontrada.' });
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao atualizar despesa com o ID ${id}:`, error.message);
-                console.error(error.stack);
-                res.status(400 | 401).json({ error: 'Erro ao atualizar despesa.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            if (!despesaContaAtualizada) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_atualizar", despesaContaAtualizada);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async excluirDespesaConta(req: Request, res: Response) {
-        const { id } = req.params;
-
+    static async excluirDespesaConta(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaConta = await DespesaConta.findById(id).populate('conta', 'nome');
-            if (!despesaConta) {
-                return res.status(404).json({ error: 'Despesa não encontrada.' });
+            const despesaConta = await DespesaConta.findById(req.params.id);
+            if (!despesaConta) return responderAPI(res, 404, "erro_encontrar");
+
+            await DespesaConta.findByIdAndDelete(req.params.id);
+
+            if (despesaConta.conta) {
+                await Conta.findByIdAndUpdate(
+                    despesaConta.conta,
+                    { $pull: { despesasConta: req.params.id } }
+                );
             }
 
-            const nomeConta = despesaConta.conta && 'nome' in despesaConta.conta ? despesaConta.conta['nome'] : 'Desconhecida';
-
-            await DespesaConta.findByIdAndDelete(id);
-
-            if (despesaConta.conta && despesaConta.conta._id) {
-                await Conta.findByIdAndUpdate(despesaConta.conta._id, { $pull: { despesasConta: id } });
-            }
-
-            res.status(200).json({ message: `DespesaConta excluída com sucesso e vínculo removido da conta ${nomeConta}.` });
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao excluir a despesa com o ID ${id}:`, error.message);
-                res.status(400 | 401).json({ error: 'Erro ao excluir despesa.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            responderAPI(res, 200, "sucesso_excluir", { id: req.params.id });
+        } catch (erro) {
+            next(erro);
         }
     }
+
+
 }
 
 export default DespesaContaController;

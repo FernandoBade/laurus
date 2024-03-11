@@ -47,7 +47,7 @@ class AuthController {
             const token = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '12h' });
             const tokenAtivo = jwt.sign({ id: usuario._id }, jwtSecretoRenovacao, { expiresIn: '7d' });
 
-            await Usuario.findByIdAndUpdate(usuario._id, { tokenAtivo: tokenAtivo });
+            await Usuario.findByIdAndUpdate(usuario._id, { tokenAtivo: tokenAtivo, ultimoAcesso: Date.now() });
 
             logger.notice(resource('log_sucessoLogin', { id: usuario._id }));
             responderAPI(res, 200, 'sucesso_login', { token: token }, { usuario: usuario });
@@ -70,12 +70,11 @@ class AuthController {
     static async logout(req: Request, res: Response) {
 
         try {
-            const usuario = await Usuario.findByIdAndUpdate(req.params.id, {
-                $unset: { tokenAtivo: "" },
-                $set: { ultimoAcesso: new Date() }
-            }, {
-                new: true
-            }).exec();
+            const usuario = await Usuario.findByIdAndUpdate(
+                req.params.id,
+                { $unset: { tokenAtivo: "" } },
+                { new: true }
+            ).exec();
 
             if (!usuario) {
                 return responderAPI(res, 404, 'erro_usuarioNaoEncontrado');

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import despesaContaRoutes from './routes/despesaContaRoutes';
 import despesaCartaoCreditoRoutes from './routes/despesaCartaoCreditoRoutes';
@@ -13,7 +13,7 @@ import receitaCategoriaRoutes from './routes/receitaCategoriaRoutes';
 import receitaSubcategoriaRoutes from './routes/receitaSubcategoriaRoutes';
 import receitaContaRoutes from './routes/receitaContaRoutes';
 import receitaCartaoCreditoRoutes from './routes/receitaCartaoCreditoRoutes';
-import { resource } from './utils/commons';
+import {logger, resource, responderAPI } from './utils/commons';
 
 require('dotenv').config();
 
@@ -45,6 +45,11 @@ app.use('/api/usuario', usuarioRoutes);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
+});
+
+app.use((erro: any, req: Request, res: Response, next: NextFunction) => {
+    logger.error(resource("log_erroInternoServidor", { erro: erro.stack }));
+    responderAPI(res, 500, "erro_internoServidor", { erro: erro.stack });
 });
 
 export default app;

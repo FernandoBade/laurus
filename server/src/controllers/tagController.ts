@@ -1,96 +1,82 @@
-import { Request, Response } from 'express';
-import Joi from 'joi';
 import Tag from '../models/tag';
 import Usuario from '../models/usuario';
-
-const tagSchema = Joi.object({
-    nome: Joi.string().required(),
-    usuario: Joi.string().required(),
-    ativo: Joi.boolean()
-});
-
-const tagUpdateSchema = Joi.object({
-    nome: Joi.string().optional(),
-    ativo: Joi.boolean()
-}).min(1);
+import { responderAPI } from '../utils/commons';
+import { Request, Response, NextFunction } from 'express';
 
 class TagController {
-    static async criarTag(req: Request, res: Response) {
-        const { error, value } = tagSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
+    static async criarTag(req: Request, res: Response, next: NextFunction) {
+        const usuarioExistente = await Usuario.findById(req.body.usuario);
+        if (!usuarioExistente) return responderAPI(res, 404, 'erro_encontrar');
 
         try {
-            const usuarioExistente = await Usuario.findById(value.usuario);
-            if (!usuarioExistente) return res.status(404).json({ error: 'Usuário não encontrado' });
+            const novaTag = await new Tag(req.body).save();
 
-            const novaTag = new Tag(value);
-            await novaTag.save();
+            await Usuario.findByIdAndUpdate(
+                req.body.usuario,
+                { $push: { tags: novaTag._id } },
+                { new: true }
+            );
 
-            usuarioExistente.tags.push(novaTag._id);
-            await usuarioExistente.save();
-
-            res.status(201).json(novaTag);
-        } catch (e: any) {
-            res.status(500).json({ error: e.message });
+            responderAPI(res, 201, 'sucesso_cadastrar', novaTag);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async listarTags(req: Request, res: Response) {
+    static async listarTags(req: Request, res: Response, next: NextFunction) {
         try {
-            const tags = await Tag.find();
-            res.json(tags);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao listar tags' });
+            const tags = await Tag.find(req.query);
+
+            responderAPI(res, 200, "sucesso_buscar", tags);
+        } catch (erro: any) {
+            next(erro);
         }
     }
 
-    static async obterTagPorId(req: Request, res: Response) {
-        const { id } = req.params;
+    static async obterTagPorId(req: Request, res: Response, next: NextFunction) {
         try {
-            const tag = await Tag.findById(id);
-            if (!tag) return res.status(404).json({ error: 'Tag não encontrada' });
-            res.json(tag);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao obter tag' });
+            const tags = await Tag.findById(req.params.id);
+            if (!tags) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_buscar", tags);
+        } catch (erro: any) {
+            next(erro);
         }
     }
 
-    static async atualizarTag(req: Request, res: Response) {
-        const { id } = req.params;
-        const { error, value } = tagUpdateSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
-
+    static async atualizarTag(req: Request, res: Response, next: NextFunction) {
         try {
-            const tagAtualizada = await Tag.findByIdAndUpdate(id, value, { new: true });
-            if (!tagAtualizada) return res.status(404).json({ error: 'Tag não encontrada' });
-            res.json(tagAtualizada);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao atualizar tag' });
+            const tagAtualizada = await Tag.findByIdAndUpdate(
+                req.params.id,
+                { $set: req.body },
+                { new: true }
+            );
+
+            if (!tagAtualizada) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_atualizar", tagAtualizada);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async excluirTag(req: Request, res: Response) {
-        const { id } = req.params;
+
+    static async excluirTag(req: Request, res: Response, next: NextFunction) {
         try {
-            const tag = await Tag.findById(id).populate('usuario', 'nome');
-            if (!tag) return res.status(404).json({ error: 'Tag não encontrada' });
+            const tag = await Tag.findById(req.params.id);
+            if (!tag) return responderAPI(res, 404, "erro_encontrar");
 
-            const nomeUsuario = tag.usuario && 'nome' in tag.usuario ? tag.usuario['nome'] : 'Desconhecido';
+            await Tag.findByIdAndDelete(req.params.id);
 
-            await Tag.findByIdAndDelete(id);
+            if (tag.usuario)
+                await Usuario.findByIdAndUpdate(
+                    tag.usuario,
+                    { $pull: { tags: tag._id } }
+                );
 
-            if (tag.usuario && tag.usuario._id) {
-                await Usuario.findByIdAndUpdate(tag.usuario._id, { $pull: { tags: tag._id } });
-            }
-
-            res.status(200).json({ message: `Tag excluída com sucesso e vínculo com ${nomeUsuario} removido.` });
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao excluir tag com o ID ${id}:`, error.message);
-                res.status(400 | 401).json({ error: 'Erro ao excluir tag.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            responderAPI(res, 200, "sucesso_excluir", { id: req.params.id });
+        } catch (erro) {
+            next(erro);
         }
     }
 }

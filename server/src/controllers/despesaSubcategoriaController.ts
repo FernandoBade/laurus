@@ -1,94 +1,82 @@
-import { Request, Response } from 'express';
-import Joi from 'joi';
 import DespesaSubcategoria from '../models/despesaSubcategoria';
 import DespesaCategoria from '../models/despesaCategoria';
-
-const despesaSubcategoriaSchema = Joi.object({
-    nome: Joi.string().required(),
-    categoria: Joi.string().required(),
-    usuario: Joi.string().required(),
-    ativo: Joi.boolean()
-});
-
-const despesaSubcategoriaUpdateSchema = Joi.object({
-    nome: Joi.string().optional(),
-    categoria: Joi.string().required(),
-    ativo: Joi.boolean()
-}).min(1);
+import { responderAPI } from '../utils/commons';
+import { Request, Response, NextFunction } from 'express';
 
 class DespesaSubcategoriaController {
-    static async criarDespesaSubcategoria(req: Request, res: Response) {
-        const { error, value } = despesaSubcategoriaSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
+    static async criarDespesaSubcategoria(req: Request, res: Response, next: NextFunction) {
+        const despesaCategoriaExiste = await DespesaCategoria.findById(req.body.categoria);
+        if (!despesaCategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
 
         try {
-            const novaDespesaSubcategoria = new DespesaSubcategoria(value);
-            await novaDespesaSubcategoria.save();
+            const novaDespesaSubcategoria = await new DespesaSubcategoria(req.body).save();
 
-            await DespesaCategoria.findByIdAndUpdate(value.categoria, { $push: { receitaSubcategorias: novaDespesaSubcategoria._id } });
+            await DespesaCategoria.findByIdAndUpdate(
+                req.body.categoria,
+                { $push: { despesaSubcategorias: novaDespesaSubcategoria._id } },
+                { new: true }
+            );
 
-            res.status(201).json(novaDespesaSubcategoria);
-        } catch (e: any) {
-            res.status(500).json({ error: e.message });
+            responderAPI(res, 201, "sucesso_cadastrar", novaDespesaSubcategoria);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async listarDespesaSubcategorias(req: Request, res: Response) {
+    static async listarDespesaSubcategorias(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaSubcategorias = await DespesaSubcategoria.find();
-            res.json(despesaSubcategorias);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao listar subcategorias de despesa' });
+            const despesaSubcategorias = await DespesaSubcategoria.find(req.query);
+
+            responderAPI(res, 200, "sucesso_buscar", despesaSubcategorias);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async obterDespesaSubcategoriaPorId(req: Request, res: Response) {
-        const { id } = req.params;
+    static async obterDespesaSubcategoriaPorId(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaSubcategoria = await DespesaSubcategoria.findById(id);
-            if (!despesaSubcategoria) return res.status(404).json({ error: 'Subcategoria de despesa não encontrada' });
-            res.json(despesaSubcategoria);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao obter subcategoria de despesa' });
+            const despesaSubcategoria = await DespesaSubcategoria.findById(req.params.id);
+            if (!despesaSubcategoria) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_buscar", despesaSubcategoria);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async atualizarDespesaSubcategoria(req: Request, res: Response) {
-        const { id } = req.params;
-        const { error, value } = despesaSubcategoriaUpdateSchema.validate(req.body);
-        if (error) return res.status(400).json({ error: error.details[0].message });
-
+    static async atualizarDespesaSubcategoria(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaSubcategoriaAtualizada = await DespesaSubcategoria.findByIdAndUpdate(id, value, { new: true });
-            if (!despesaSubcategoriaAtualizada) return res.status(404).json({ error: 'Subcategoria de despesa não encontrada' });
-            res.json(despesaSubcategoriaAtualizada);
-        } catch (e) {
-            res.status(500).json({ error: 'Erro ao atualizar subcategoria de despesa' });
+            const despesaSubcategoriaAtualizada = await DespesaSubcategoria.findByIdAndUpdate(
+                req.params.id,
+                { $set: req.body },
+                { new: true }
+            );
+
+            if (!despesaSubcategoriaAtualizada) return responderAPI(res, 404, "erro_encontrar");
+
+            responderAPI(res, 200, "sucesso_atualizar", despesaSubcategoriaAtualizada);
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async excluirDespesaSubcategoria(req: Request, res: Response) {
-        const { id } = req.params;
+    static async excluirDespesaSubcategoria(req: Request, res: Response, next: NextFunction) {
         try {
-            const despesaSubcategoria = await DespesaSubcategoria.findById(id).populate('categoria', 'nome');
-            if (!despesaSubcategoria) return res.status(404).json({ error: 'Subcategoria de despesa não encontrada' });
+            const despesaSubcategoria = await DespesaSubcategoria.findById(req.params.id);
+            if (!despesaSubcategoria) return responderAPI(res, 404, "erro_encontrar");
 
-            const nomeCategoria = despesaSubcategoria.categoria && 'nome' in despesaSubcategoria.categoria ? despesaSubcategoria.categoria['nome'] : 'Desconhecida';
-
-            await DespesaSubcategoria.findByIdAndDelete(id);
+            await DespesaSubcategoria.findByIdAndDelete(req.params.id);
 
             if (despesaSubcategoria.categoria) {
-                await DespesaCategoria.findByIdAndUpdate(despesaSubcategoria.categoria._id, { $pull: { receitaSubcategorias: id } });
+                await DespesaCategoria.findByIdAndUpdate(
+                    despesaSubcategoria.categoria,
+                    { $pull: { despesaSubcategorias: req.params.id } }
+                );
             }
 
-            res.status(200).json({ message: `Subcategoria de despesa excluída com sucesso e vínculo removido com a categoria ${nomeCategoria}` });
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error(`Erro ao excluir a subcategoria com o ID ${id}:`, error.message);
-                res.status(400 | 401).json({ error: 'Erro ao excluir subcategoria.', errorMessage: error.message });
-            } else {
-                res.status(500).json({ error: 'Erro interno do servidor.' });
-            }
+            responderAPI(res, 200, "sucesso_excluir", { id: req.params.id });
+        } catch (erro) {
+            next(erro);
         }
     }
 }

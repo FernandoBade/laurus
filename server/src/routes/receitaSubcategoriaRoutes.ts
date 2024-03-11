@@ -1,13 +1,14 @@
 import express from 'express';
-import ReceitaaSubcategoriaController from '../controllers/receitaSubcategoriaController';
-import { validarToken } from '../utils/commons';
+import ReceitaSubcategoriaController from '../controllers/receitaSubcategoriaController';
+import { validarToken, validarCorpoDaRequisicao, validarFiltrosBusca } from '../utils/commons';
+import { receitaSubcategoriaSchema, receitaSubcategoriaUpdateSchema } from '../utils/assets/schemasJoi';
 
 const router = express.Router();
 
-router.post('/', validarToken, ReceitaaSubcategoriaController.criarReceitaSubcategoria);
-router.get('/', validarToken, ReceitaaSubcategoriaController.listarReceitaSubcategorias);
-router.get('/:id', validarToken, ReceitaaSubcategoriaController.obterReceitaSubcategoriaPorId);
-router.put('/:id', validarToken, ReceitaaSubcategoriaController.atualizarReceitaSubcategoria);
-router.delete('/:id', validarToken, ReceitaaSubcategoriaController.excluirReceitaSubcategoria);
+router.post('/', validarToken, validarCorpoDaRequisicao(receitaSubcategoriaSchema), ReceitaSubcategoriaController.criarReceitaSubcategoria);
+router.get('/', validarToken, validarFiltrosBusca, ReceitaSubcategoriaController.listarReceitaSubcategorias);
+router.get('/:id', validarToken, ReceitaSubcategoriaController.obterReceitaSubcategoriaPorId);
+router.put('/:id', validarToken, validarCorpoDaRequisicao(receitaSubcategoriaUpdateSchema), ReceitaSubcategoriaController.atualizarReceitaSubcategoria);
+router.delete('/:id', validarToken, ReceitaSubcategoriaController.excluirReceitaSubcategoria);
 
 export default router;

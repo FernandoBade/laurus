@@ -1,99 +1,81 @@
-import { Request, Response } from 'express';
-import Joi from 'joi';
-import CartaoCredito from '../models/cartaoCredito';
 import Usuario from '../models/usuario';
-import { logger, resource, responderAPI } from '../utils/commons';
-import { EnumBandeiras } from '../utils/assets/enums';
-
-const cartaoCreditoSchema = Joi.object({
-    nome: Joi.string().required(),
-    bandeira: Joi.string().valid(...Object.values(EnumBandeiras)).required(),
-    diaFechamentoFatura: Joi.number().required(),
-    diaVencimentoFatura: Joi.number().required(),
-    usuario: Joi.string().required(),
-    ativo: Joi.boolean()
-});
-
-const cartaoCreditoUpdateSchema = Joi.object({
-    nome: Joi.string().optional(),
-    bandeira: Joi.string().valid(...Object.values(EnumBandeiras)).optional(),
-    diaFechamentoFatura: Joi.number().optional(),
-    diaVencimentoFatura: Joi.number().optional(),
-    ativo: Joi.boolean()
-}).min(1);
+import CartaoCredito from '../models/cartaoCredito';
+import { responderAPI } from '../utils/commons';
+import { Request, Response, NextFunction } from 'express';
 
 class CartaoCreditoController {
-    static async criarCartaoCredito(req: Request, res: Response) {
-        const { error: erro, value: valor } = cartaoCreditoSchema.validate(req.body);
-        if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
-
-        const usuarioExistente = await Usuario.findById(valor.usuario);
-        if (!usuarioExistente) return responderAPI(res, 404, "erro_naoEncontrado");
+    static async criarCartaoCredito(req: Request, res: Response, next: NextFunction) {
+        const usuarioExistente = await Usuario.findById(req.body.usuario);
+        if (!usuarioExistente) return responderAPI(res, 404, "erro_encontrar");
 
         try {
-            const novoCartaoCredito = await new CartaoCredito(valor).save();
+            const novoCartaoCredito = await new CartaoCredito(req.body).save();
 
-            usuarioExistente.cartoesDeCredito.push(novoCartaoCredito._id);
-            await usuarioExistente.save();
+            await Usuario.findByIdAndUpdate(
+                req.body.usuario,
+                { $push: { cartoesDeCredito: novoCartaoCredito._id } },
+                { new: true }
+            );
 
             responderAPI(res, 201, "sucesso_cadastrar", novoCartaoCredito);
-        } catch (erro: any) {
-            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
-            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async listarCartoesCredito(req: Request, res: Response) {
+    static async listarCartoesCredito(req: Request, res: Response, next: NextFunction) {
         try {
-            const cartoesCredito = await CartaoCredito.find();
+            const cartoesCredito = await CartaoCredito.find(req.query)
 
             responderAPI(res, 200, "sucesso_buscar", cartoesCredito);
-        } catch (erro: any) {
-            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
-            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async obterCartaoCreditoPorId(req: Request, res: Response) {
+    static async obterCartaoCreditoPorId(req: Request, res: Response, next: NextFunction) {
         try {
-            const cartaoCredito = await CartaoCredito.findById(req.params.id);
-            if (!cartaoCredito) return responderAPI(res, 404, "erro_naoEncontrado");
+            const cartaoCredito = await CartaoCredito.findById(req.params.id)
+            if (!cartaoCredito) return responderAPI(res, 404, "erro_encontrar");
 
             responderAPI(res, 200, "sucesso_buscar", cartaoCredito);
-        } catch (erro: any) {
-            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
-            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
+        } catch (erro) {
+            next(erro);
         }
     }
 
-    static async atualizarCartaoCredito(req: Request, res: Response) {
-        const { error: erro, value: valor } = cartaoCreditoUpdateSchema.validate(req.body);
-        if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
-
+    static async atualizarCartaoCredito(req: Request, res: Response, next: NextFunction) {
         try {
-            const cartaoCreditoAtualizado = await CartaoCredito.findByIdAndUpdate(req.params.id, valor, { new: true });
-            if (!cartaoCreditoAtualizado) return responderAPI(res, 404, "erro_naoEncontrado");
+            const cartaoCreditoAtualizado = await CartaoCredito.findByIdAndUpdate(
+                req.params.id,
+                { $set: req.body },
+                { new: true }
+            );
+
+            if (!cartaoCreditoAtualizado) return responderAPI(res, 404, "erro_encontrar");
 
             responderAPI(res, 200, "sucesso_atualizar", cartaoCreditoAtualizado);
         } catch (erro: any) {
-            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
-            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
+            next(erro);
         }
     }
 
-    static async excluirCartaoCredito(req: Request, res: Response) {
+    static async excluirCartaoCredito(req: Request, res: Response, next: NextFunction) {
         try {
             const cartaoCredito = await CartaoCredito.findById(req.params.id);
-            if (!cartaoCredito) return responderAPI(res, 404, "erro_naoEncontrado", { id: req.params.id });
+            if (!cartaoCredito) return responderAPI(res, 404, "erro_encontrar");
 
             await CartaoCredito.findByIdAndDelete(req.params.id);
 
-            if (cartaoCredito.usuario) await Usuario.findByIdAndUpdate(cartaoCredito.usuario, { $pull: { cartoesDeCredito: cartaoCredito._id } });
+            if (cartaoCredito.usuario)
+                await Usuario.findByIdAndUpdate(
+                    cartaoCredito.usuario,
+                    { $pull: { cartoesDeCredito: cartaoCredito._id } }
+                );
 
-            responderAPI(res, 200, "sucesso_excluir", cartaoCredito);
-        } catch (erro: any) {
-            logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
-            responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
+            responderAPI(res, 200, "sucesso_excluir", { id: req.params.id });
+        } catch (erro) {
+            next(erro);
         }
     }
 }

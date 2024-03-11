@@ -1,13 +1,14 @@
 import express from 'express';
 import DespesaContaController from '../controllers/despesaContaController';
-import { validarToken } from '../utils/commons';
+import { validarCorpoDaRequisicao, validarFiltrosBusca, validarToken } from '../utils/commons';
+import { despesaContaSchema, despesaContaUpdateSchema } from '../utils/assets/schemasJoi';
 
 const router = express.Router();
 
-router.post('/', validarToken, DespesaContaController.criarDespesaConta);
-router.get('/', validarToken, DespesaContaController.listarDespesasConta);
+router.post('/', validarToken, validarCorpoDaRequisicao(despesaContaSchema), DespesaContaController.criarDespesaConta);
+router.get('/', validarToken, validarFiltrosBusca, DespesaContaController.listarDespesasConta);
 router.get('/:id', validarToken, DespesaContaController.obterDespesaContaPorId);
-router.put('/:id', validarToken, DespesaContaController.atualizarDespesaConta);
+router.put('/:id', validarToken, validarCorpoDaRequisicao(despesaContaUpdateSchema), DespesaContaController.atualizarDespesaConta);
 router.delete('/:id', validarToken, DespesaContaController.excluirDespesaConta);
 
 export default router;

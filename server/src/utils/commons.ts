@@ -1,12 +1,15 @@
 //#region _importacoes
-import { createLogger, format, transports, addColors } from 'winston';
 import 'winston-daily-rotate-file';
 import path from 'path';
 import i18n from '../utils/assets/resources';
-import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
 import jwt, { VerifyErrors } from 'jsonwebtoken';
-import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
 import mongoose, { Model } from 'mongoose';
+import { filtroBuscaSchema } from '../utils/assets/schemasJoi';
+import { Request, Response, NextFunction } from 'express';
+import { createLogger, format, transports, addColors } from 'winston';
+import { addDays, format as formatDate, isAfter, isBefore, isEqual, parse, parseISO, subDays } from 'date-fns';
+
 require('dotenv').config();
 //#endregion _importacoes
 
@@ -191,7 +194,7 @@ export function gerarDataAleatoria(dias: number, passadoOuFuturo: number | boole
 }
 
 /**
-* Responde a uma requisição API com uma mensagem internacionalizada.
+* Responde a uma requisição API de forma padrão e com uma mensagem internacionalizada.
 * @param res Objeto de resposta do Express.
 * @param status Código de status HTTP para a resposta.
 * @param chave Chave de internacionalização para a mensagem de resposta.
@@ -222,9 +225,12 @@ export function responderAPI(
     res.status(status).json(resposta);
 }
 
-
-
-
+/**
+* Realiza a validação do token enviado nas requisições
+* @param req Objeto de requisição do Express.
+* @param res Objeto de resposta do Express.
+* @param next Chamma a próxima etapa de validação do Express.
+*/
 export const validarToken = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
@@ -258,4 +264,31 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
         }
     });
 };
+
+/**
+ * Realiza a validação do token enviado nas requisições
+ * @param req Objeto de requisição do Express.
+ * @param res Objeto de resposta do Express.
+ * @param joiSchema Schema que será validado pelo Joi
+ */
+export function validarCorpoDaRequisicao(joiSchema: Joi.Schema) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const { error: erro, value: valor } = joiSchema.validate(req.body);
+        if (erro) {
+            responderAPI(res, 400, "erro_validacaoJoi", erro.details);
+        } else {
+            req.body = valor;
+            next();
+        }
+    };
+}
+
+export const validarFiltrosBusca = (req: Request, res: Response, next: NextFunction) => {
+    const { error: erro } = filtroBuscaSchema.validate(req.query);
+    if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
+    
+    next();
+};
+
+
 //#endregion _gerais
