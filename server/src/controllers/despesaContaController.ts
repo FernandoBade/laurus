@@ -1,5 +1,7 @@
 import Conta from '../models/conta';
+import DespesaCategoria from '../models/despesaCategoria';
 import DespesaConta from '../models/despesaConta';
+import DespesaSubcategoria from '../models/despesaSubcategoria';
 import { responderAPI } from '../utils/commons';
 import { Request, Response, NextFunction } from 'express';
 
@@ -7,6 +9,12 @@ class DespesaContaController {
     static async criarDespesaConta(req: Request, res: Response, next: NextFunction) {
         const contaExiste = await Conta.findById(req.body.conta);
         if (!contaExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const despesaCategoriaExiste = await DespesaCategoria.findById(req.body.categoria);
+        if (!despesaCategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const despesaSubcategoriaExiste = await DespesaSubcategoria.findById(req.body.subcategoria);
+        if(!despesaSubcategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
 
         try {
             const novaDespesaConta = await new DespesaConta(req.body).save();

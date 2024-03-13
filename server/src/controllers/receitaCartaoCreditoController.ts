@@ -1,5 +1,7 @@
 import CartaoCredito from '../models/cartaoCredito';
 import ReceitaCartaoCredito from '../models/receitaCartaoCredito';
+import ReceitaCategoria from '../models/receitaCategoria';
+import ReceitaSubcategoria from '../models/receitaSubcategoria';
 import { responderAPI } from '../utils/commons';
 import { NextFunction, Request, Response } from 'express';
 
@@ -7,6 +9,12 @@ class ReceitaCartaoCreditoController {
     static async criarReceitaCartaoCredito(req: Request, res: Response, next: NextFunction) {
         const cartaoCreditoExiste = await CartaoCredito.findById(req.body.cartaoCredito);
         if (!cartaoCreditoExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const receitaCategoriaExiste = await ReceitaCategoria.findById(req.body.categoria);
+        if (!receitaCategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const receitaSubcategoriaExiste = await ReceitaSubcategoria.findById(req.body.subcategoria);
+        if(!receitaSubcategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
 
         try {
             const novaReceitaCartaoCredito = await new ReceitaCartaoCredito(req.body).save();
@@ -26,7 +34,7 @@ class ReceitaCartaoCreditoController {
     static async listarReceitasCartaoCredito(req: Request, res: Response, next: NextFunction) {
         try {
             const receitasCartaoCredito = await ReceitaCartaoCredito.find(req.query);
-            
+
             responderAPI(res, 200, "sucesso_buscar", receitasCartaoCredito);
         } catch (erro) {
             next(erro);

@@ -6,8 +6,11 @@ import { Request, Response, NextFunction } from 'express';
 class UsuarioController {
     static async cadastrarUsuario(req: Request, res: Response, next: NextFunction) {
         try {
-            const usuarioExistente = await Usuario.findOne({ email: req.body.email });
+            const emailNormalizado = req.body.email.trim().toLowerCase();
+            const usuarioExistente = await Usuario.findOne({ email: emailNormalizado });
             if (usuarioExistente) return responderAPI(res, 400, 'erro_emailJaCadastrado');
+
+            const dadosUsuario = { ...req.body, email: emailNormalizado };
 
             const novoUsuario = await new Usuario(req.body).save();
 

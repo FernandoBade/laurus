@@ -5,7 +5,7 @@ import logger, { resource } from '../utils/commons';
 
 const usuarioSchema = new mongoose.Schema({
     nome: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     sobrenome: { type: String, required: true },
     telefone: { type: String },
     senha: { type: String, required: true },
@@ -13,7 +13,7 @@ const usuarioSchema = new mongoose.Schema({
     tokenAtivo: { type: String },
     ativo: { type: Boolean, default: true },
     ultimoAcesso: { type: Date, default: Date.now() },
-    aparencia: { type: String, enum: EnumAparencias, default: EnumAparencias.DARK_MODE },
+    aparencia: { type: String, enum: EnumAparencias, default: EnumAparencias.DARK_MODE, required: false },
     idioma: { type: String, required: true, enum: EnumIdiomas, default: EnumIdiomas.PT_BR },
     moeda: { type: String, required: true, enum: EnumMoedas, default: EnumMoedas.BRL },
     formatoData: { type: String, required: true, enum: EnumFormatoData, default: EnumFormatoData.DD_MM_YYYY },

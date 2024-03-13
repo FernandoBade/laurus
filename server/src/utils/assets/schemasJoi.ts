@@ -1,4 +1,6 @@
 import Joi from "joi";
+import PasswordComplexity from "joi-password-complexity";
+
 import {
     EnumAparencias,
     EnumBandeiras,
@@ -7,7 +9,6 @@ import {
     EnumMoedas,
     EnumTipoConta
 } from "./enums";
-
 
 export const cartaoCreditoSchema = Joi.object({
     nome: Joi.string().min(2).max(50).required(),
@@ -45,7 +46,7 @@ export const contaUpdateSchema = Joi.object({
 
 export const despesaCartaoCreditoSchema = Joi.object({
     cartaoCredito: Joi.string().required(),
-    valor: Joi.number().min(0).max(999999999).required(),
+    valor: Joi.number().min(0.01).max(999999999).required(),
     dataTransacao: Joi.date().iso().required(),
     despesaCategoria: Joi.string().required(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
@@ -67,7 +68,7 @@ export const despesaCartaoCreditoSchema = Joi.object({
 
 export const despesaCartaoCreditoUpdateSchema = Joi.object({
     cartaoCredito: Joi.string().optional(),
-    valor: Joi.number().min(0).max(999999999).optional(),
+    valor: Joi.number().min(0.01).max(999999999).optional(),
     dataTransacao: Joi.date().iso().optional(),
     despesaCategoria: Joi.string().optional(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
@@ -100,7 +101,7 @@ export const despesaCategoriaUpdateSchema = Joi.object({
 
 export const despesaContaSchema = Joi.object({
     conta: Joi.string().required(),
-    valor: Joi.number().min(0).max(999999999).required(),
+    valor: Joi.number().min(0.01).max(999999999).required(),
     dataTransacao: Joi.date().iso().required(),
     despesaCategoria: Joi.string().required(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
@@ -111,7 +112,7 @@ export const despesaContaSchema = Joi.object({
 
 export const despesaContaUpdateSchema = Joi.object({
     conta: Joi.string().optional(),
-    valor: Joi.number().min(0).max(999999999).optional(),
+    valor: Joi.number().min(0.01).max(999999999).optional(),
     dataTransacao: Joi.date().iso().optional(),
     despesaCategoria: Joi.string().optional(),
     despesaSubcategoria: Joi.string().allow(null).optional(),
@@ -146,7 +147,7 @@ export const filtroBuscaSchema = Joi.object({
 
 export const receitaCartaoCreditoSchema = Joi.object({
     cartaoCredito: Joi.string().required(),
-    valor: Joi.number().min(0).max(999999999).required(),
+    valor: Joi.number().min(0.01).max(999999999).required(),
     dataTransacao: Joi.date().iso().required(),
     receitaCategoria: Joi.string().required(),
     receitaSubcategoria: Joi.string().allow(null).optional(),
@@ -157,7 +158,7 @@ export const receitaCartaoCreditoSchema = Joi.object({
 
 export const receitaCartaoCreditoUpdateSchema = Joi.object({
     cartaoCredito: Joi.string().optional(),
-    valor: Joi.number().min(0).max(999999999).optional(),
+    valor: Joi.number().min(0.01).max(999999999).optional(),
     dataTransacao: Joi.date().iso().optional(),
     receitaCategoria: Joi.string().optional(),
     receitaSubcategoria: Joi.string().allow(null).optional(),
@@ -223,32 +224,51 @@ export const tagUpdateSchema = Joi.object({
     ativo: Joi.boolean()
 }).min(1);
 
+const dataMinima = new Date();
+dataMinima.setFullYear(dataMinima.getFullYear() - 16);
+
 export const usuarioSchema = Joi.object({
     nome: Joi.string().min(3).max(50).required(),
-    sobrenome: Joi.string().min(3).max(150).required(),
+    sobrenome: Joi.string().min(3).max(10).required(),
     email: Joi.string().email().lowercase().required(),
-    senha: Joi.string().min(8).max(25).required(),
-    dataNascimento: Joi.date().iso().required(),
+    senha: PasswordComplexity({
+        min: 8,
+        max: 25,
+        lowerCase: 1,
+        upperCase: 1,
+        numeric: 1,
+        symbol: 1,
+        requirementCount: 4,
+    }).required(),
+    dataNascimento: Joi.date().iso().max(dataMinima).required(),
     telefone: Joi.string().optional(),
     ultimoAcesso: Joi.date().iso().optional(),
-    ativo: Joi.boolean(),
-    aparencia: Joi.string().valid(...Object.values(EnumAparencias)).required(),
-    idioma: Joi.string().valid(...Object.values(EnumIdiomas)).required(),
-    moeda: Joi.string().valid(...Object.values(EnumMoedas)).required(),
-    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).required()
+    ativo: Joi.boolean().optional(),
+    aparencia: Joi.string().valid(...Object.values(EnumAparencias)).default(EnumAparencias.DARK_MODE).optional(),
+    idioma: Joi.string().valid(...Object.values(EnumIdiomas)).default(EnumIdiomas.PT_BR).required(),
+    moeda: Joi.string().valid(...Object.values(EnumMoedas)).default(EnumMoedas.BRL).required(),
+    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).default(EnumFormatoData.DD_MM_YYYY).required()
 });
 
 export const usuarioUpdateSchema = Joi.object({
     nome: Joi.string().min(3).max(50).optional(),
-    sobrenome: Joi.string().min(3).max(150).optional(),
+    sobrenome: Joi.string().min(3).max(10).optional(),
     email: Joi.string().email().lowercase().optional(),
-    senha: Joi.string().min(8).max(25).optional(),
-    dataNascimento: Joi.date().iso().optional(),
-    ultimoAcesso: Joi.date().iso().optional(),
+    senha: PasswordComplexity({
+        min: 8,
+        max: 25,
+        lowerCase: 1,
+        upperCase: 1,
+        numeric: 1,
+        symbol: 1,
+        requirementCount: 4,
+    }).required(),
+    dataNascimento: Joi.date().iso().max(dataMinima).optional(),
     telefone: Joi.string().optional(),
-    ativo: Joi.boolean(),
+    ultimoAcesso: Joi.date().iso().optional(),
+    ativo: Joi.boolean().optional(),
     aparencia: Joi.string().valid(...Object.values(EnumAparencias)).optional(),
     idioma: Joi.string().valid(...Object.values(EnumIdiomas)).optional(),
     moeda: Joi.string().valid(...Object.values(EnumMoedas)).optional(),
-    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).optional()
+    formatoData: Joi.string().valid(...Object.values(EnumFormatoData)).optional(),
 }).min(1);

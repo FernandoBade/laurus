@@ -1,21 +1,46 @@
+import mongoose from 'mongoose';
 import CartaoCredito from '../models/cartaoCredito';
 import DespesaCartaoCredito from '../models/despesaCartaoCredito';
+import DespesaCategoria from '../models/despesaCategoria';
+import DespesaSubcategoria from '../models/despesaSubcategoria';
+import Tag from '../models/tag';
 import { responderAPI } from '../utils/commons';
 import { Request, Response, NextFunction } from 'express';
 
 class DespesaCartaoCreditoController {
+
     static async criarDespesaCartaoCredito(req: Request, res: Response, next: NextFunction) {
-        const cartaoCreditoExiste = await CartaoCredito.findById(req.body.cartaoCredito);
-        if (!cartaoCreditoExiste) return responderAPI(res, 404, "erro_encontrar");
+        const idsValidos = [
+            { nome: 'cartaoCredito', valido: mongoose.isValidObjectId(req.body.cartaoCredito) },
+            { nome: 'despesaCategoria', valido: mongoose.isValidObjectId(req.body.despesaCategoria) },
+            { nome: 'despesaSubcategoria', valido: req.body.despesaSubcategoria ? mongoose.isValidObjectId(req.body.despesaSubcategoria) : true },
+            ...(req.body.tags || []).map((tag: string) => ({ nome: `tag: ${tag}`, valido: mongoose.isValidObjectId(tag) }))
+        ];
+
+        const idsInvalidos = idsValidos.filter(id => !id.valido);
+
+        if (idsInvalidos.length > 0) {
+            const idsInvalidosNomes = idsInvalidos.map(id => id.nome).join(', ');
+            return responderAPI(res, 400, "erro_idInvalido", {}, { ids: idsInvalidosNomes });
+        }
+
+        const referencias = [
+            CartaoCredito.findById(req.body.cartaoCredito),
+            DespesaCategoria.findById(req.body.despesaCategoria),
+            req.body.despesaSubcategoria ?
+                DespesaSubcategoria.findById(req.body.despesaSubcategoria) :
+                Promise.resolve(true),
+            ...(req.body.tags || []).map((tag: string) => Tag.findById(tag))
+        ];
+
+        const resultados = await Promise.all(referencias);
+
+        if (resultados.some(resultado => !resultado)) {
+            return responderAPI(res, 404, "erro_referenciaNaoEncontrada");
+        }
 
         try {
             const novaDespesaCartaoCredito = await new DespesaCartaoCredito(req.body).save();
-
-            await CartaoCredito.findByIdAndUpdate(
-                req.body.cartaoCredito,
-                { $push: { despesasCartaoCredito: novaDespesaCartaoCredito._id } },
-                { new: true }
-            );
 
             responderAPI(res, 201, "sucesso_cadastrar", novaDespesaCartaoCredito);
         } catch (erro) {

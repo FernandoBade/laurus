@@ -4,11 +4,19 @@ import Conta from '../models/conta';
 import mongoose from 'mongoose';
 import { receitaContaUpdateSchema } from '../utils/assets/schemasJoi';
 import { responderAPI } from '../utils/commons';
+import ReceitaCategoria from '../models/receitaCategoria';
+import ReceitaSubcategoria from '../models/receitaSubcategoria';
 
 class ReceitaContaController {
     static async criarReceitaConta(req: Request, res: Response, next: NextFunction) {
         const contaExiste = await Conta.findById(req.body.conta);
         if (!contaExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const receitaCategoriaExiste = await ReceitaCategoria.findById(req.body.categoria);
+        if (!receitaCategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
+
+        const receitaSubcategoriaExiste = await ReceitaSubcategoria.findById(req.body.subcategoria);
+        if(!receitaSubcategoriaExiste) return responderAPI(res, 404, "erro_encontrar");
 
         try {
             const novaReceitaConta = await new ReceitaConta(req.body).save();
