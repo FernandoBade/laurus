@@ -28,12 +28,17 @@ export enum EnumMoedas {
     UYU = "UYU"
 }
 
-export enum EnumTipoConta{
+export enum EnumTipoConta {
     CORRENTE = "Corrente",
     POUPANCA = "Poupança",
     INVESTIMENTO = "Investimento",
     SALARIO = "Salário",
     OUTRA = "Outra"
+}
+
+export enum EnumTipoToken {
+    ACESSO = "acesso",
+    RENOVACAO = "renovação"
 }
 
 export enum EnumBandeiras {

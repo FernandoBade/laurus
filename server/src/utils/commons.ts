@@ -225,16 +225,10 @@ export function responderAPI(
     res.status(status).json(resposta);
 }
 
-/**
-* Realiza a validação do token enviado nas requisições
-* @param req Objeto de requisição do Express.
-* @param res Objeto de resposta do Express.
-* @param next Chamma a próxima etapa de validação do Express.
-*/
 export const validarToken = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
-
     const jwtSecreto = process.env.JWT_SECRETO;
+
     if (!jwtSecreto) {
         throw new Error(resource('erro.variavelAmbiente'));
     }
@@ -243,18 +237,22 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
         return responderAPI(res, 401, 'erro_tokenNaoFornecido');
     }
 
-    const UsuarioModel: Model<any> = mongoose.model('Usuario');
-
     jwt.verify(token, jwtSecreto, async (erro: VerifyErrors | null, decoded: any) => {
         if (erro) {
-            return responderAPI(res, 401, 'erro_sessaoExpirada', erro.toString(), {});
+            return responderAPI(res, 401, 'erro_sessaoExpirada', erro.message, {});
         }
 
         if (decoded && typeof decoded === 'object' && 'id' in decoded) {
-            const usuario = await UsuarioModel.findById(decoded.id);
+            const usuario = await mongoose.model('Usuario').findById(decoded.id);
+
+            if (!usuario) {
+                return responderAPI(res, 404, 'erro_encontrarUsuario');
+            }
 
             const ultimoAcesso = usuario.ultimoAcesso ?? new Date(0);
-            if (new Date(decoded.iat * 1000) < ultimoAcesso) {
+            const dataToken = new Date(decoded.iat * 1000);
+
+            if (dataToken < new Date(ultimoAcesso.getTime() - 10 * 1000)) {
                 return responderAPI(res, 401, 'erro_tokenVencido');
             }
 
@@ -264,6 +262,7 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
         }
     });
 };
+
 
 /**
  * Realiza a validação do token enviado nas requisições
@@ -286,7 +285,7 @@ export function validarCorpoDaRequisicao(joiSchema: Joi.Schema) {
 export const validarFiltrosBusca = (req: Request, res: Response, next: NextFunction) => {
     const { error: erro } = filtroBuscaSchema.validate(req.query);
     if (erro) return responderAPI(res, 400, "erro_validacaoJoi", erro.details);
-    
+
     next();
 };
 
