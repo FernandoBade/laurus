@@ -4,23 +4,12 @@ import Usuario from '../models/usuario';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import usuario from '../models/usuario';
+import Token from '../models/token';
+import { EnumTipoToken } from '../utils/assets/enums';
 
 dotenv.config();
 
 class AuthController {
-    /**
-    * Autentica um usuário com base em suas credenciais (e-mail e senha).
-    * Se as credenciais forem válidas, dois tokens JWT são gerados:
-    * - Um Access Token com curta duração para autenticação imediata.
-    * - Um Refresh Token com longa duração para renovação do Access Token.
-    *
-    * @param {Request} req - O objeto de requisição do Express, contendo o e-mail e a senha no corpo.
-    * @param {Response} res - O objeto de resposta do Express, usado para enviar a resposta ao cliente.
-    *
-    * Em caso de sucesso, retorna os tokens junto com os dados do usuário.
-    * Em caso de falha (credenciais inválidas, variáveis de ambiente ausentes, etc.), retorna um erro apropriado.
-    */
     static async login(req: Request, res: Response) {
         const jwtSecreto = process.env.JWT_SECRETO;
         const jwtSecretoRenovacao = process.env.JWT_SECRETO_RENOVACAO;
@@ -44,29 +33,32 @@ class AuthController {
                 return responderAPI(res, 401, 'erro_senhaIncorreta', { idioma: usuario.idioma });
             }
 
-            const token = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '12h' });
-            const tokenAtivo = jwt.sign({ id: usuario._id }, jwtSecretoRenovacao, { expiresIn: '7d' });
+            const tokenAcesso = jwt.sign({ id: usuario._id }, jwtSecreto, { expiresIn: '24h' });
+            const tokenRenovacao = jwt.sign({ id: usuario._id }, jwtSecretoRenovacao, { expiresIn: '30d' });
 
-            await Usuario.findByIdAndUpdate(usuario._id, { tokenAtivo: tokenAtivo, ultimoAcesso: Date.now() });
+            // Armazene os tokens no banco de dados
+            await new Token({
+                usuario: usuario._id,
+                valor: tokenAcesso,
+                tipo: EnumTipoToken.ACESSO,
+                expiraEm: new Date(Date.now() + 3 * 24 * 3600 * 1000)
+            }).save();
+
+            await new Token({
+                usuario: usuario._id,
+                valor: tokenRenovacao,
+                tipo: EnumTipoToken.RENOVACAO,
+                expiraEm: new Date(Date.now() + 30 * 24 * 3600 * 1000)
+            }).save();
 
             logger.notice(resource('log_sucessoLogin', { id: usuario._id }));
-            responderAPI(res, 200, 'sucesso_login', { token: token }, { usuario: usuario });
+            responderAPI(res, 200, 'sucesso_login', { tokenAcesso }, { usuario });
         } catch (erro: any) {
             logger.error(resource("log_erroInternoServidor", { stack: erro.stack }));
             responderAPI(res, 500, "erro_internoServidor", { stack: erro.stack });
         }
     }
 
-    /**
-    * Desloga um usuário invalidando seu Refresh Token atual.
-    * Isso é feito removendo ou desassociando o Refresh Token do usuário no banco de dados.
-    *
-    * @param {Request} req - O objeto de requisição do Express, contendo o Refresh Token no corpo.
-    * @param {Response} res - O objeto de resposta do Express, usado para enviar a resposta ao cliente.
-    *
-    * Em caso de sucesso, retorna uma mensagem indicando que o logout foi bem-sucedido.
-    * Em caso de erro na operação de banco de dados, retorna um erro.
-    */
     static async logout(req: Request, res: Response) {
 
         try {

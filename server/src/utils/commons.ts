@@ -225,11 +225,15 @@ export function responderAPI(
     res.status(status).json(resposta);
 }
 
-export const validarToken = (req: Request, res: Response, next: NextFunction) => {
+import Token from '../models/token';
+import { EnumTipoToken } from './assets/enums';
+
+export const validarToken = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
     const jwtSecreto = process.env.JWT_SECRETO;
+    const jwtSecretoRenovacao = process.env.JWT_SECRETO_RENOVACAO;
 
-    if (!jwtSecreto) {
+    if (!jwtSecreto || !jwtSecretoRenovacao) {
         throw new Error(resource('erro.variavelAmbiente'));
     }
 
@@ -239,21 +243,33 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
 
     jwt.verify(token, jwtSecreto, async (erro: VerifyErrors | null, decoded: any) => {
         if (erro) {
-            return responderAPI(res, 401, 'erro_sessaoExpirada', erro.message, {});
-        }
+            // Se o token de acesso estiver vencido, tente renovar usando o token de renovação
+            if (erro.name === 'TokenExpiredError') {
+                const tokenRenovacao = await Token.findOne({ valor: token, tipo: EnumTipoToken.RENOVACAO });
 
-        if (decoded && typeof decoded === 'object' && 'id' in decoded) {
+                if (!tokenRenovacao || new Date() > tokenRenovacao.expiraEm) {
+                    return responderAPI(res, 401, 'erro_tokenVencido');
+                }
+
+                const novoTokenAcesso = jwt.sign({ id: tokenRenovacao.usuario }, jwtSecreto, { expiresIn: '24h' });
+
+                await new Token({
+                    usuario: tokenRenovacao.usuario,
+                    valor: novoTokenAcesso,
+                    tipo: EnumTipoToken.ACESSO,
+                    expiraEm: new Date(Date.now() + 24 * 3600 * 1000)
+                }).save();
+
+                req.headers['authorization'] = `Bearer ${novoTokenAcesso}`;
+                next();
+            } else {
+                return responderAPI(res, 401, 'erro_sessaoExpirada', erro.message, {});
+            }
+        } else if (decoded && typeof decoded === 'object' && 'id' in decoded) {
             const usuario = await mongoose.model('Usuario').findById(decoded.id);
 
             if (!usuario) {
                 return responderAPI(res, 404, 'erro_encontrarUsuario');
-            }
-
-            const ultimoAcesso = usuario.ultimoAcesso ?? new Date(0);
-            const dataToken = new Date(decoded.iat * 1000);
-
-            if (dataToken < new Date(ultimoAcesso.getTime() - 10 * 1000)) {
-                return responderAPI(res, 401, 'erro_tokenVencido');
             }
 
             next();
@@ -262,7 +278,6 @@ export const validarToken = (req: Request, res: Response, next: NextFunction) =>
         }
     });
 };
-
 
 /**
  * Realiza a validação do token enviado nas requisições

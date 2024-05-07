@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Executar TypeScript",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "args": [
+                "${workspaceFolder}../server/src/laurus.ts"
+            ],
+            "cwd": "${workspaceFolder}",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "sourceMaps": true
+        }
+    ]
+}

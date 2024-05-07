@@ -1,5 +1,6 @@
 import Token from '../models/token';
 import Usuario from '../models/usuario';
+import { EnumTipoToken } from '../utils/assets/enums';
 import { responderAPI } from '../utils/commons';
 import { Request, Response, NextFunction } from 'express';
 
@@ -12,7 +13,7 @@ class TokenController {
             const novoToken = new Token({
                 ...req.body,
                 expiraEm:
-                    req.body.tipo === "acesso" ?
+                    req.body.tipo === EnumTipoToken.ACESSO ?
                         12 * 3600 * 1000 :
                         7 * 24 * 3600 * 1000
             });

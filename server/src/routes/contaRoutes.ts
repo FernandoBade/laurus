@@ -3,7 +3,6 @@ import ContaController from '../controllers/contaController';
 import { validarCorpoDaRequisicao, validarFiltrosBusca, validarToken } from '../utils/commons';
 import { contaSchema, contaUpdateSchema } from '../utils/assets/schemasJoi';
 
-
 const router = express.Router();
 
 router.post('/', validarToken, validarCorpoDaRequisicao(contaSchema),ContaController.criarConta);

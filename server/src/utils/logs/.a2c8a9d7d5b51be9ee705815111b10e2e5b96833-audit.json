@@ -6,49 +6,9 @@
     "auditLog": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\.a2c8a9d7d5b51be9ee705815111b10e2e5b96833-audit.json",
     "files": [
         {
-            "date": 1709438718700,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-03-03-2024.log",
-            "hash": "1a2ac83288f29568e0ce1795524f2369826f7cff323e1b11f48951b872658474"
-        },
-        {
-            "date": 1709527998789,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-04-03-2024.log",
-            "hash": "a0f116e52b62149e1f74291bbf606f7fa55dbb355a26cd2ed4f1cda611f5b0c2"
-        },
-        {
-            "date": 1709608506383,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-05-03-2024.log",
-            "hash": "78b4a230b00c608986bfbc012d60d7dacbc5af6f015e8ee383c749fefc994d24"
-        },
-        {
-            "date": 1709863908045,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-07-03-2024.log",
-            "hash": "0e5f86f88468dc93182ac7b24a8ef31d77f7ea36d321eeb1334ef1c6f159070e"
-        },
-        {
-            "date": 1709867133870,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-08-03-2024.log",
-            "hash": "99659250a32fd9921da71e73fa1c77f9927400091b679b1050cfbdf70efcf1b5"
-        },
-        {
-            "date": 1710075007371,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-10-03-2024.log",
-            "hash": "36428e8b6fbb0f6c1214499512065c28a331eb45ef2fa5f2061bd488011e7af3"
-        },
-        {
-            "date": 1710291470525,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-12-03-2024.log",
-            "hash": "18b68c7510ff74f56a1a6b9abae82fa698037a9798b93c82b7e6b874b5296cc0"
-        },
-        {
-            "date": 1710298995225,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-13-03-2024.log",
-            "hash": "6f022c9e15a109cfc9cc76651f114b9b4752612209cf2c79df915dcbaefe704d"
-        },
-        {
-            "date": 1710464770916,
-            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-14-03-2024.log",
-            "hash": "140690b8f5255314bee3ae06bf9058db6f83d665983c02250ac6e9aa0955ff86"
+            "date": 1715044104415,
+            "name": "C:\\GitHub\\laurus\\server\\src\\utils\\logs\\laurus-06-05-2024.log",
+            "hash": "3b095a20206b9c986bfcda03805b98d6eac66ccb12bab9df45b326414bebe6f0"
         }
     ],
     "hashType": "sha256"

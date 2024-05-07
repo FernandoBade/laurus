@@ -7,7 +7,8 @@ import {
     EnumFormatoData,
     EnumIdiomas,
     EnumMoedas,
-    EnumTipoConta
+    EnumTipoConta,
+    EnumTipoToken
 } from "./enums";
 
 export const cartaoCreditoSchema = Joi.object({
@@ -222,6 +223,22 @@ export const tagSchema = Joi.object({
 export const tagUpdateSchema = Joi.object({
     nome: Joi.string().min(2).max(50).optional(),
     ativo: Joi.boolean()
+}).min(1);
+
+export const tokenSchema = Joi.object({
+    usuario: Joi.string().required(),
+    valor: Joi.string().required(),
+    tipo: Joi.string().valid(...Object.values(EnumTipoToken)).required(),
+    expiraEm: Joi.date().iso().min('now').required(),
+    ativo: Joi.boolean().default(true).optional()
+});
+
+export const tokenUpdateSchema = Joi.object({
+    usuario: Joi.string().optional(),
+    valor: Joi.string().optional(),
+    tipo: Joi.string().valid(...Object.values(EnumTipoToken)).optional(),
+    expiraEm: Joi.date().iso().min('now').optional(),
+    ativo: Joi.boolean().optional()
 }).min(1);
 
 const dataMinima = new Date();

@@ -3,7 +3,6 @@ import CartaoCreditoController from '../controllers/cartaoCreditoController'
 import { validarToken, validarCorpoDaRequisicao, validarFiltrosBusca } from '../utils/commons';
 import { cartaoCreditoSchema, cartaoCreditoUpdateSchema } from '../utils/assets/schemasJoi';
 
-
 const router = express.Router();
 
 router.post('/', validarToken, validarCorpoDaRequisicao(cartaoCreditoSchema), CartaoCreditoController.criarCartaoCredito);

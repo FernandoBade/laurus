@@ -1,21 +1,25 @@
+//#region imports
+import authRoutes from './routes/authRoutes';
 import express, { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import despesaContaRoutes from './routes/despesaContaRoutes';
-import despesaCartaoCreditoRoutes from './routes/despesaCartaoCreditoRoutes';
-import usuarioRoutes from './routes/usuarioRoutes';
 import cartaoCreditoRoutes from './routes/cartaoCreditoRoutes';
 import contaRoutes from './routes/contaRoutes';
-import authRoutes from './routes/authRoutes';
+import despesaCartaoCreditoRoutes from './routes/despesaCartaoCreditoRoutes';
 import despesaCategoriaRoutes from './routes/despesaCategoriaRoutes';
+import despesaContaRoutes from './routes/despesaContaRoutes';
 import despesaSubcategoriaRoutes from './routes/despesaSubcategoriaRoutes';
-import tagRoutes from './routes/tagRoutes';
-import receitaCategoriaRoutes from './routes/receitaCategoriaRoutes';
-import receitaSubcategoriaRoutes from './routes/receitaSubcategoriaRoutes';
-import receitaContaRoutes from './routes/receitaContaRoutes';
+import mongoose from 'mongoose';
 import receitaCartaoCreditoRoutes from './routes/receitaCartaoCreditoRoutes';
-import {logger, resource, responderAPI } from './utils/commons';
+import receitaCategoriaRoutes from './routes/receitaCategoriaRoutes';
+import receitaContaRoutes from './routes/receitaContaRoutes';
+import receitaSubcategoriaRoutes from './routes/receitaSubcategoriaRoutes';
+import tagRoutes from './routes/tagRoutes';
+import tokenRoutes from './routes/tokenRoutes';
+import usuarioRoutes from './routes/usuarioRoutes';
+import { logger, resource, responderAPI } from './utils/commons';
+import path from 'path';
+//#endregion imports
 
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const uri = process.env.URI;
 if (!uri) {
@@ -40,6 +44,7 @@ app.use('/api/receitaCategoria', receitaCategoriaRoutes);
 app.use('/api/receitaConta', receitaContaRoutes);
 app.use('/api/receitaSubcategoria', receitaSubcategoriaRoutes);
 app.use('/api/tag', tagRoutes);
+app.use('/api/token', tokenRoutes);
 app.use('/api/usuario', usuarioRoutes);
 
 const PORT = process.env.PORT || 3001;
