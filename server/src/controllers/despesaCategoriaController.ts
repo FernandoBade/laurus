@@ -80,7 +80,6 @@ class DespesaCategoriaController {
             next(erro);
         }
     }
-
 }
 
 export default DespesaCategoriaController;

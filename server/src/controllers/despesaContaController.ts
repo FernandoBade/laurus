@@ -89,8 +89,6 @@ class DespesaContaController {
             next(erro);
         }
     }
-
-
 }
 
 export default DespesaContaController;
